@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import me.SgtMjrME.Object.Race;
-import me.SgtMjrME.Object.WarPlayers;
-
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -16,6 +14,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+
+import me.SgtMjrME.object.Race;
+import me.SgtMjrME.object.WarPlayers;
 
 public class HealGroup extends BaseAbility {
 	PotionEffect pot;
@@ -35,8 +36,8 @@ public class HealGroup extends BaseAbility {
 		cost = cs.getInt("cost", 3);
 		delay = cs.getLong("delay", 20000);
 		desc = ChatColor.translateAlternateColorCodes('&', cs.getString("description", "(3 wp) Heals your surrounding allies"));
-		item = new ItemStack(cs.getInt("item"), 1, (short) cs.getInt("data"));
-		String s = cs.getString("lore", "");
+		item = new ItemStack(Material.NETHER_STAR, 1, (short) 0);
+		String s = "HealGroup";
 		ItemMeta im = item.getItemMeta();
 		im.setDisplayName(disp);
 		if (s != null && s != ""){

@@ -8,9 +8,9 @@ import me.SgtMjrME.RCWars;
 import me.SgtMjrME.Util;
 import me.SgtMjrME.ClassUpdate.Abilities.AbilityTimer;
 import me.SgtMjrME.ClassUpdate.Abilities.BaseAbility;
-import me.SgtMjrME.Object.Race;
-import me.SgtMjrME.Object.WarPlayers;
-import me.SgtMjrME.Tasks.SetHelmetColor;
+import me.SgtMjrME.object.Race;
+import me.SgtMjrME.object.WarPlayers;
+import me.SgtMjrME.tasks.SetHelmetColor;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

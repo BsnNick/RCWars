@@ -1,9 +1,10 @@
 name: RCWars
+authors: [SgtMjrME, 000Nick]
 main: me.SgtMjrME.RCWars
-version: 3.0
-description: IT'S FRICKIN WARS V.3.0!!! 
+version: 4.0
+description: Wars 4.0, the 1.8 update by 000Nick.
 softdepend: [Essentials]
-depends: [TagAPI, Vault]
+depends: [Vault]
 
 commands:
     startwar:
@@ -17,6 +18,7 @@ commands:
     resetWarStats:
         description: console only, resets the database (clears entries)
     warthanks:
+        description: By SgtMjrME, updated to 1.8 for v4.0 by 000Nick
     wsetworld:
         description: set the world
     wsetlobby:

@@ -6,11 +6,12 @@ import java.util.List;
 
 import me.SgtMjrME.RCWars;
 import me.SgtMjrME.Util;
-import me.SgtMjrME.Object.Race;
-import me.SgtMjrME.Object.WarPlayers;
+import me.SgtMjrME.object.Race;
+import me.SgtMjrME.object.WarPlayers;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -34,9 +35,9 @@ public class Cloak extends BaseAbility {
 		cost = cs.getInt("cost", 3);
 		delay = cs.getLong("delay", 60000);
 		ChatColor.translateAlternateColorCodes('&', desc = cs.getString("description", "(3 WP) Gain a temp invisibility. Lost when you attack"));
-		item = new ItemStack(cs.getInt("item"), 1,
-				(short) cs.getInt("data"));
-		String s = cs.getString("lore", "");
+		item = new ItemStack(Material.QUARTZ, 1,
+				(short) 0);
+		String s = "Cloak";
 		ItemMeta im = item.getItemMeta();
 		im.setDisplayName(disp);
 		if (s != null && s != ""){

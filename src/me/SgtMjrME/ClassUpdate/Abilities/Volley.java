@@ -7,6 +7,7 @@ import me.SgtMjrME.RCWars;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
@@ -28,7 +29,7 @@ public class Volley extends BaseAbility {
 		cost = cs.getInt("cost", 3);
 		delay = cs.getLong("delay", 10000);
 		desc = ChatColor.translateAlternateColorCodes('&', cs.getString("description", "(3 wp) Launches a volley of arrows"));
-		item = new ItemStack(cs.getInt("item"), 1, (short) cs.getInt("data"));
+		item = new ItemStack(Material.PRISMARINE_SHARD, 1, (short) 0);
 		String s = cs.getString("lore", "");
 		ItemMeta im = item.getItemMeta();
 		im.setDisplayName(disp);

@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -24,8 +27,8 @@ public class FireArrow extends BaseAbility {
 		cost = cs.getInt("cost", 0);
 		delay = cs.getLong("delay", 15000);
 		desc = ChatColor.translateAlternateColorCodes('&', cs.getString("description", "Launches a fire arrow"));
-		item = new ItemStack(cs.getInt("item"), 1, (short) cs.getInt("data"));
-		String s = cs.getString("lore", "");
+		item = new ItemStack(Material.BLAZE_ROD, 1, (short) 0);
+		String s = "FireArrow";
 		ItemMeta im = item.getItemMeta();
 		im.setDisplayName(disp);
 		if (s != null && s != ""){
@@ -48,6 +51,15 @@ public class FireArrow extends BaseAbility {
 		if ((e.getEntity() instanceof Arrow)) {
 			((Arrow) e.getEntity()).setFireTicks(600);
 		}
+		return true;
+	}
+	
+	public boolean onInteract(Player p, PlayerInteractEvent e)
+	{
+		Arrow s = (Arrow)p.launchProjectile(Arrow.class);
+		s.setShooter(p);
+		e.setCancelled(true);
+		
 		return true;
 	}
 

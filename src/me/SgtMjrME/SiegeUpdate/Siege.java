@@ -8,7 +8,7 @@ import java.util.Random;
 
 import me.SgtMjrME.RCWars;
 import me.SgtMjrME.Util;
-import me.SgtMjrME.Object.Base;
+import me.SgtMjrME.object.Base;
 
 import org.bukkit.Location;
 import org.bukkit.World;

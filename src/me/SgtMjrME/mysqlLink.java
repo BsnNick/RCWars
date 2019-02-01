@@ -6,13 +6,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import me.SgtMjrME.Object.DatabaseObject;
-import me.SgtMjrME.Object.WarPoints;
-
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-public class mysqlLink {
+import me.SgtMjrME.object.DatabaseObject;
+import me.SgtMjrME.object.WarPoints;
+
+public class mysqlLink
+{
 	String address;
 	String port;
 	String user;
@@ -20,37 +21,46 @@ public class mysqlLink {
 	String database_name;
 	Connection con;
 
-	mysqlLink(String address, String port, String u, String p,
-			String database_name) {
+	mysqlLink(String address, String port, String u, String p, String database_name)
+	{
 		this.address = address;
 		this.port = port;
 		user = u;
 		pass = p;
 		this.database_name = database_name;
-		try {
+		
+		try
+		{
 			reestablishConnection();
-			if (!con.isValid(10)) {
+			
+			if (!con.isValid(10))
+			{
 				con = null;
 				return;
 			}
-			PreparedStatement s = con
-					.prepareStatement("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '"
+			
+			PreparedStatement s = con.prepareStatement("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '"
 							+ database_name + "' AND table_name = 'data';");
 			ResultSet result = s.executeQuery();
 			result.next();
 			int hasTable = result.getInt(1);
-			if (hasTable != 1) {
+			
+			if (hasTable != 1)
+			{
 				createTable();
 				Util.sendLog("[RCWars] New table created");
 			}
-		} catch (SQLException e) {
+		}
+		catch (SQLException e)
+		{
 			con = null;
 			Util.sendLog("[RCWars] MySQL ERROR SQLEX");
 			e.printStackTrace();
 		}
 	}
 
-	public void createTable() {
+	public void createTable()
+	{
 		try {
 			if ((con == null) || (!con.isValid(0))) {
 				Util.sendLog("[RCWars] Connection is invalid");

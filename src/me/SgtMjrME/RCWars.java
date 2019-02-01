@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,27 +15,28 @@ import java.util.logging.Logger;
 import me.SgtMjrME.ClassUpdate.WarClass;
 import me.SgtMjrME.ClassUpdate.WarRank;
 import me.SgtMjrME.ClassUpdate.Abilities.AbilityTimer;
-import me.SgtMjrME.Listeners.BlockListener;
-import me.SgtMjrME.Listeners.EntityListener;
-import me.SgtMjrME.Listeners.MobHandler;
-import me.SgtMjrME.Listeners.PlayerListenerNew;
-import me.SgtMjrME.Listeners.TagAPIListener;
-import me.SgtMjrME.Object.Base;
-import me.SgtMjrME.Object.Kit;
-import me.SgtMjrME.Object.Race;
-import me.SgtMjrME.Object.Rally;
-import me.SgtMjrME.Object.WarPlayers;
-import me.SgtMjrME.Object.WarPoints;
-import me.SgtMjrME.Object.state;
 import me.SgtMjrME.SiegeUpdate.Cannon;
 import me.SgtMjrME.SiegeUpdate.Siege;
-import me.SgtMjrME.Tasks.AnnounceBaseStatus;
-import me.SgtMjrME.Tasks.DisplayStats;
-import me.SgtMjrME.Tasks.ScoreboardHandler;
-import me.SgtMjrME.Tasks.gateCheck;
-import me.SgtMjrME.Tasks.runCheck;
-import me.SgtMjrME.Tasks.spawnCheck;
-import me.SgtMjrME.Tasks.timedExp;
+import me.SgtMjrME.listeners.BlockListener;
+import me.SgtMjrME.listeners.EntityListener;
+import me.SgtMjrME.listeners.MobHandler;
+import me.SgtMjrME.listeners.PlayerListenerNew;
+import me.SgtMjrME.listeners.TagAPIListener;
+import me.SgtMjrME.object.Base;
+import me.SgtMjrME.object.Kit;
+import me.SgtMjrME.object.Race;
+import me.SgtMjrME.object.Rally;
+import me.SgtMjrME.object.WarPlayers;
+import me.SgtMjrME.object.WarPoints;
+import me.SgtMjrME.object.state;
+import me.SgtMjrME.tasks.AnnounceBaseStatus;
+import me.SgtMjrME.tasks.CosmeticHandler;
+import me.SgtMjrME.tasks.DisplayStats;
+import me.SgtMjrME.tasks.ScoreboardHandler;
+import me.SgtMjrME.tasks.gateCheck;
+import me.SgtMjrME.tasks.runCheck;
+import me.SgtMjrME.tasks.spawnCheck;
+import me.SgtMjrME.tasks.timedExp;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -47,6 +49,7 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -55,6 +58,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 public class RCWars extends JavaPlugin {
@@ -93,8 +97,6 @@ public class RCWars extends JavaPlugin {
 	public double rank5 = 1; 
 	public double rank6 = 1;
 	
-	
-	
 	/*
 	 * UPDATE #1:  DONE (reordered)
 		move "other items" to backpack
@@ -104,6 +106,9 @@ public class RCWars extends JavaPlugin {
 		Kits can run commands OR have items
 		commands:
 		    <anything>: cmd
+     * UPDATE #4: DONE
+		spawn eggs (this is gonna be an epic one)
+		-spawneggs will spawn mobs to fight, but wont hurt teammates DONE (1/2) (tested)
 	 * UPDATE #5: DONE
 		-load warpoints stats in the lobby, but dont allow to buy (not in game)  DONE? (tested)
 		- Scoreboard for WarPoints (from player.yml, not from database) (DONE)
@@ -121,15 +126,19 @@ public class RCWars extends JavaPlugin {
 	     Set all chats to proper tag
 	 * UPDATE #10: DONE (tested)
 	     remove rain
-	 * UPDATE #4: DONE
-		spawn eggs (this is gonna be an epic one)
-		-spawneggs will spawn mobs to fight, but wont hurt teammates DONE (1/2) (tested)
 	 * UPDATE #11: DONE (tested)
 	 	Color the ability names
+	 * UPDATE #12: DONE (tested)
+	    Update to 1.8 (-000Nick)
+	 * UPDATE #13: WIP (untested)
+	    Optimize code; add some cosmetics; prepare for next RC server (-000Nick)
 	 	
 	 	??? EMERGENCY
 	 	Bug: Healmage teleports (tested)
 	 	        Healmage heatlh TESTING
+	 	        
+	 	I have updated the plugin to 1.8! Things may/are probably broken,
+	 	report these bugs to my Discord at 'Nick つ ◕_◕ ༽つ#5942'. -000Nick
 	 	        
 	 */
 
@@ -219,7 +228,7 @@ public class RCWars extends JavaPlugin {
 		open = true;
 		
 		warPoints = new WarPoints(config.getInt("warpointmax",150), mysql, this);
-		timedWarPoints = config.getInt("warpoints",1);
+		timedWarPoints = config.getInt("warpoints", 1);
 
 		repairBaseVal = config.getInt("repairBaseVal", 1);
 		timedTime = (config.getLong("timedTimer", 1L) * 20L * 60L);
@@ -233,6 +242,17 @@ public class RCWars extends JavaPlugin {
 		for (String bl : block) {
 			allowedItems.add(Integer.parseInt(bl));
 		}
+		
+		/* TODO
+		 * 
+		 * Team colored TNT trails! Will use RGB values and reddust particles to add
+		 *  colored trails to the tnt that correspond to the player's team color.
+		 *  Add the TNT entity to '_tnt' ArrayList, and remove it when it
+		 *  is removed/killed/invalid. Let's add more cosmetic apsects to RCWars!
+		 *  -000Nick
+		 */
+		Bukkit.getScheduler().runTaskTimer(this, new CosmeticHandler(), 1, 4);
+		
 		MobHandler.resetMobs();
 		loadRaces();
 		Base.loadBases(this);
@@ -519,13 +539,10 @@ public class RCWars extends JavaPlugin {
 			}
 			onEnable();
 		} else if (commandLabel.equalsIgnoreCase("warthanks")) {
-			Util.sendMessage(p, "Credits: " + ChatColor.GOLD
-					+ "Richard Johnson (SergeantMajorME)", false);
-			Util.sendMessage(p, "Produced exclusively for " + ChatColor.GOLD
-					+ "RealmCraft!", false);
-			Util.sendMessage(p, getDescription().getFullName() + " "
-					+ getDescription().getDescription(), false);
-			if (p.getName().equalsIgnoreCase("SergeantMajorME")) {
+			Util.sendMessage(p, "Credits: " + ChatColor.GOLD + "Richard Johnson (SergeantMajorME), Nick B. (000Nick)", false);
+			Util.sendMessage(p, "Produced originally for " + ChatColor.GOLD + "RealmCraft!", false);
+			Util.sendMessage(p, getDescription().getFullName() + " " + getDescription().getDescription(), false);
+			if ((p.getName().equalsIgnoreCase("SergeantMajorME") || (p.getName().equalsIgnoreCase("000Nick")))) {
 				if (args.length < 4)
 					return true;
 				int type = Race.toInt(args[0]);

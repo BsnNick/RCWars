@@ -3,10 +3,8 @@ package me.SgtMjrME.ClassUpdate.Abilities;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.SgtMjrME.Object.Race;
-import me.SgtMjrME.Object.WarPlayers;
-
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -14,6 +12,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+
+import me.SgtMjrME.object.Race;
+import me.SgtMjrME.object.WarPlayers;
 
 public class Sap extends BaseAbility {
 	PotionEffect slow = new PotionEffect(PotionEffectType.SLOW, 200, 1, true);
@@ -28,8 +29,8 @@ public class Sap extends BaseAbility {
 		cost = cs.getInt("cost", 0);
 		delay = cs.getLong("delay", 15000);
 		desc = ChatColor.translateAlternateColorCodes('&', cs.getString("description", "Slows down your target"));
-		item = new ItemStack(cs.getInt("item"), 1, (short) cs.getInt("data"));
-		String s = cs.getString("lore", "");
+		item = new ItemStack(Material.STRING, 1, (short) 0);
+		String s = "Sap";
 		ItemMeta im = item.getItemMeta();
 		im.setDisplayName(disp);
 		if (s != null && s != ""){

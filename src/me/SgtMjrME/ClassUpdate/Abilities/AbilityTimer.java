@@ -6,8 +6,8 @@ import java.util.Iterator;
 
 import me.SgtMjrME.RCWars;
 import me.SgtMjrME.Util;
-import me.SgtMjrME.Object.WarPoints;
-import me.SgtMjrME.Tasks.AbilityCooldown;
+import me.SgtMjrME.object.WarPoints;
+import me.SgtMjrME.tasks.AbilityCooldown;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

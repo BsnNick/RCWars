@@ -5,11 +5,12 @@ import java.util.HashSet;
 import java.util.List;
 
 import me.SgtMjrME.RCWars;
-import me.SgtMjrME.Object.Race;
-import me.SgtMjrME.Object.WarPlayers;
+import me.SgtMjrME.object.Race;
+import me.SgtMjrME.object.WarPlayers;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.LivingEntity;
@@ -33,8 +34,8 @@ public class DrainLife extends BaseAbility {
 		cost = cs.getInt("cost", 2);
 		delay = cs.getLong("delay", 5000);
 		desc = ChatColor.translateAlternateColorCodes('&', cs.getString("description", "(2 WP) Drain life from your enemy"));
-		item = new ItemStack(cs.getInt("item"), 1, (short) cs.getInt("data"));
-		String s = cs.getString("lore", "");
+		item = new ItemStack(Material.MAGMA_CREAM, 1, (short) 0);
+		String s = "DrainLife";
 		ItemMeta im = item.getItemMeta();
 		im.setDisplayName(disp);
 		if (s != null && s != ""){
@@ -53,7 +54,7 @@ public class DrainLife extends BaseAbility {
 				return false;
 
 			e.setDamage(e.getDamage() + 4);
-			LivingEntity pl = ((EnderPearl) e.getDamager()).getShooter();
+			LivingEntity pl = (LivingEntity) ((EnderPearl) e.getDamager()).getShooter();
 			pl.setHealth(pl.getHealth() + 2 > 20 ? 20 : pl.getHealth() + 2);
 			return false;
 		}

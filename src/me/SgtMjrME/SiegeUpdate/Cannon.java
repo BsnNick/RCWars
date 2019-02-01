@@ -5,9 +5,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 
+import me.SgtMjrME.C;
 import me.SgtMjrME.RCWars;
 import me.SgtMjrME.Util;
-import me.SgtMjrME.Object.WarPoints;
+import me.SgtMjrME.object.WarPlayers;
+import me.SgtMjrME.object.WarPoints;
+import me.SgtMjrME.tasks.CosmeticHandler;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -77,23 +80,23 @@ public class Cannon {
 	public static void enterCannon(Player p, String s) {
 		Cannon c = getCannon(s);
 		if (c == null) {
-			Util.sendMessage(p, "Cannon not found");
+			Util.sendMessage(p, C.cRed + "Cannon not found");
 			return;
 		}
 		if (c.occupied) {
-			Util.sendMessage(p, "Cannon already occupied");
+			Util.sendMessage(p, C.cRed + "Cannon already occupied");
 			if ((times.get(c) != null)
 					&& ((System.currentTimeMillis() - ((Long) times.get(c))
 							.longValue()) / 1000L < 60L)) {
 				return;
 			}
 			leaveCannon(c);
-			Util.sendMessage(p, "Person is overtime, entering cannon");
+			Util.sendMessage(p, C.cGreen + "Person has ran out of time. Entering the cannon...");
 			enterCannon(p, s);
 			return;
 		}
 		if (cannons.get(c) == null) {
-			Util.sendMessage(p, "Cannon has no seat");
+			Util.sendMessage(p, C.cRed + "This cannon has no seat!");
 			return;
 		}
 
@@ -101,7 +104,7 @@ public class Cannon {
 
 		c.player = p;
 		c.occupied = true;
-		Util.sendMessage(c.player, ChatColor.GREEN + "You have entered the cannon");
+		Util.sendMessage(c.player, C.cGreen + "You have entered the cannon!");
 		times.put(c, Long.valueOf(System.currentTimeMillis()));
 	}
 
@@ -133,25 +136,24 @@ public class Cannon {
 
 	private void launchTNT(Player p) {
 		if (!WarPoints.spendWarPoints(p, cannonCost).booleanValue()) {
-			Util.sendMessage(p, ChatColor.RED
-					+ "Not enough War Points, removing from cannon");
+			Util.sendMessage(p, C.cRed + "You do not have enough War Points! You have left the cannon.");
 			leaveCannon(getCannon(p));
 			return;
 		}
 		Vector v = p.getLocation().getDirection().clone();
-		TNTPrimed e = (TNTPrimed) RCWars.returnPlugin().getWarWorld()
-				.spawnEntity(launch, EntityType.PRIMED_TNT);
+		TNTPrimed e = (TNTPrimed) RCWars.returnPlugin().getWarWorld().spawnEntity(launch, EntityType.PRIMED_TNT);
 		e.setYield(2.0F);
 		e.setVelocity(v.multiply(velocity));
 		e.setFuseTicks(e.getFuseTicks() / 2);
 		e.setMetadata("shooter", new TntMeta(p));
+		CosmeticHandler._tnt.put(e, WarPlayers.getRace(p).getTeam().getName().toLowerCase());
 	}
 
 	public static void loadCannons(RCWars rcWars) {
 		rcwars = rcWars;
 		File f = new File(rcWars.getDataFolder() + "/Cannons");
 		if (!f.exists()) {
-			Util.sendLog("Cannon folder not found");
+			Util.sendLog("Cannon folder not found!");
 			f.mkdir();
 		}
 		String[] files = f.list();

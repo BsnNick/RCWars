@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.SgtMjrME.RCWars;
-import me.SgtMjrME.Object.Race;
-import me.SgtMjrME.Object.WarPlayers;
+import me.SgtMjrME.object.Race;
+import me.SgtMjrME.object.WarPlayers;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -26,8 +27,8 @@ public class Rally extends BaseAbility {
 		cost = cs.getInt("cost", 9);
 		delay = cs.getLong("delay", 180000);
 		desc = ChatColor.translateAlternateColorCodes('&', cs.getString("description", "(9 wp) Sends a rally teleport request to your team"));
-		item = new ItemStack(cs.getInt("item"), 1, (short) cs.getInt("data"));
-		String s = cs.getString("lore", "");
+		item = new ItemStack(Material.GOLD_INGOT, 1, (short) 0);
+		String s = "Rally";
 		ItemMeta im = item.getItemMeta();
 		im.setDisplayName(disp);
 		if (s != null && s != ""){
@@ -43,7 +44,7 @@ public class Rally extends BaseAbility {
 		if (r == null)
 			return false;
 		RCWars.rallyDat.remove(r);
-		RCWars.rallyDat.put(r, new me.SgtMjrME.Object.Rally(p));
+		RCWars.rallyDat.put(r, new me.SgtMjrME.object.Rally(p));
 		r.sendMessage(r.getCcolor() + p.getName() + r.getCcolor()
 				+ " has asked for help! /Rally to reply to the call!");
 		return true;

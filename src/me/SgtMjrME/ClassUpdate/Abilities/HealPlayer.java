@@ -1,15 +1,17 @@
 package me.SgtMjrME.ClassUpdate.Abilities;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import me.SgtMjrME.Util;
-import me.SgtMjrME.Object.Race;
-import me.SgtMjrME.Object.WarPlayers;
+import me.SgtMjrME.object.Race;
+import me.SgtMjrME.object.WarPlayers;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Effect;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
@@ -37,8 +39,8 @@ public class HealPlayer extends BaseAbility {
 		cost = cs.getInt("cost", 0);
 		delay = cs.getLong("delay", 5000);
 		desc = ChatColor.translateAlternateColorCodes('&', cs.getString("description", "Heals your targeted player"));
-		item = new ItemStack(cs.getInt("item"), 1, (short) cs.getInt("data"));
-		String s = cs.getString("lore", "");
+		item = new ItemStack(Material.EMERALD, 1, (short) 0);
+		String s = "HealPlayer";
 		ItemMeta im = item.getItemMeta();
 		im.setDisplayName(disp);
 		if (s != null && s != ""){
@@ -50,7 +52,7 @@ public class HealPlayer extends BaseAbility {
 	}
 
 	public boolean onInteract(Player p, PlayerInteractEvent e) {
-		List<Block> it = p.getLineOfSight(null, 20);
+		List<Block> it = p.getLineOfSight((HashSet<Byte>)null, 20); // Shouldn't atter what the cast is (null anyway)
 		List<Entity> ent = p.getNearbyEntities(20.0D, 20.0D, 20.0D);
 		Player target = null;
 		for (Block targetBlock : it) {

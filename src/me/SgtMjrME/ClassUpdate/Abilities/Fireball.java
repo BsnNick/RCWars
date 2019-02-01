@@ -1,10 +1,12 @@
 package me.SgtMjrME.ClassUpdate.Abilities;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -26,8 +28,8 @@ public class Fireball extends BaseAbility {
 		cost = cs.getInt("cost", 0);
 		delay = cs.getLong("delay", 5000);
 		desc = ChatColor.translateAlternateColorCodes('&', cs.getString("description", "Launches a fireball"));
-		item = new ItemStack(cs.getInt("item"), 1, (short) cs.getInt("data"));
-		String s = cs.getString("lore", "");
+		item = new ItemStack(Material.FIREBALL, 1, (short) 0);
+		String s = "Fireball";
 		ItemMeta im = item.getItemMeta();
 		im.setDisplayName(disp);
 		if (s != null && s != ""){
@@ -69,7 +71,7 @@ public class Fireball extends BaseAbility {
 		org.bukkit.entity.Fireball f = (org.bukkit.entity.Fireball) p
 				.getWorld()
 				.spawnEntity(p.getEyeLocation(), EntityType.FIREBALL);
-		Location end = p.getTargetBlock(null, 50).getLocation();
+		Location end = p.getTargetBlock((HashSet<Byte>)null, 50).getLocation(); // Pretty sure the cast does not matter (it's null anyway)
 		Location begin = p.getEyeLocation();
 		Vector dir = end.toVector().subtract(begin.toVector());
 		f.setDirection(dir);

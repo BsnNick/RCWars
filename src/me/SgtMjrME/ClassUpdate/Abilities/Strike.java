@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -22,8 +23,8 @@ public class Strike extends BaseAbility {
 		cost = cs.getInt("cost", 3);
 		delay = cs.getLong("delay", 30000);
 		desc = ChatColor.translateAlternateColorCodes('&', cs.getString("description", "(3 wp) Launches a critical strike"));
-		item = new ItemStack(cs.getInt("item"), 1, (short) cs.getInt("data"));
-		String s = cs.getString("lore", "");
+		item = new ItemStack(Material.INK_SACK, 1, (short) 1);
+		String s = "Strike";
 		ItemMeta im = item.getItemMeta();
 		im.setDisplayName(disp);
 		if (s != null && s != ""){

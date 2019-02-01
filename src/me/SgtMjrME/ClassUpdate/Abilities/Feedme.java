@@ -6,6 +6,7 @@ import java.util.List;
 import me.SgtMjrME.ClassUpdate.WarRank;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -24,8 +25,8 @@ public class Feedme extends BaseAbility {
 		cost = cs.getInt("cost", 3);
 		delay = cs.getLong("delay", 60000);
 		desc = ChatColor.translateAlternateColorCodes('&', cs.getString("description", "(3 WP) Feeds the player"));
-		item = new ItemStack(cs.getInt("item"), 1, (short) cs.getInt("data"));
-		String s = cs.getString("lore", "");
+		item = new ItemStack(Material.BOWL, 1, (short) 0);
+		String s = "Feedme";
 		ItemMeta im = item.getItemMeta();
 		im.setDisplayName(disp);
 		if (s != null && s != ""){

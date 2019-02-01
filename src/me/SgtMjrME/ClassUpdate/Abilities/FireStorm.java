@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fireball;
@@ -32,8 +33,8 @@ public class FireStorm extends BaseAbility {
 		cost = cs.getInt("cost", 3);
 		delay = cs.getLong("delay", 30000);
 		desc = ChatColor.translateAlternateColorCodes('&', cs.getString("description", "(3 WP) Launches a firestorm"));
-		item = new ItemStack(cs.getInt("item"), 1, (short) cs.getInt("data"));
-		String s = cs.getString("lore", "");
+		item = new ItemStack(Material.NETHER_STAR, 1, (short) 0);
+		String s = "FireStorm";
 		ItemMeta im = item.getItemMeta();
 		im.setDisplayName(disp);
 		if (s != null && s != ""){

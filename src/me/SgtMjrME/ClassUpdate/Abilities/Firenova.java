@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import me.SgtMjrME.Object.Race;
-import me.SgtMjrME.Object.WarPlayers;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Effect;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
@@ -16,6 +14,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+
+import me.SgtMjrME.object.Race;
+import me.SgtMjrME.object.WarPlayers;
 
 public class Firenova extends BaseAbility {
 	public final String disp;
@@ -29,8 +30,8 @@ public class Firenova extends BaseAbility {
 		cost = cs.getInt("cost", 1);
 		delay = cs.getLong("delay", 20000);
 		desc = ChatColor.translateAlternateColorCodes('&', cs.getString("description", "(1 WP) Launches a ring of fire around you"));
-		item = new ItemStack(cs.getInt("item"), 1, (short) cs.getInt("data"));
-		String s = cs.getString("lore", "");
+		item = new ItemStack(Material.BLAZE_POWDER, 1, (short) 0);
+		String s = "Firenova";
 		ItemMeta im = item.getItemMeta();
 		im.setDisplayName(disp);
 		if (s != null && s != ""){
@@ -55,7 +56,7 @@ public class Firenova extends BaseAbility {
 		}
 		p.getWorld()
 				.playEffect(p.getLocation(), Effect.MOBSPAWNER_FLAMES, 0, 5);
-		p.getWorld().playSound(p.getLocation(), Sound.FUSE, 1.0F, 1.0F);
+		p.getWorld().playSound(p.getLocation(), Sound.ENTITY_TNT_PRIMED, 1.0F, 1.0F); // Originally Sound.FUSE
 		return true;
 	}
 

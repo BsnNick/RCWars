@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -21,13 +22,13 @@ public class Boost extends BaseAbility {
 	public final ItemStack item;
 
 	public Boost(ConfigurationSection cs) {
-		disp = ChatColor.translateAlternateColorCodes('&', cs.getString("display", "boost"));
+		disp = "boost";//ChatColor.translateAlternateColorCodes('&', cs.getString("display", "boost"));
 		cost = cs.getInt("cost", 0);
 		delay = cs.getLong("delay", 30000);
 		desc = ChatColor.translateAlternateColorCodes('&', cs.getString("description", "Gain a temp speed boost"));
-		item = new ItemStack(cs.getInt("item"), 1,
-				(short) cs.getInt("data"));
-		String s = cs.getString("lore", "");
+		item = new ItemStack(Material.FEATHER, 1,
+				(short) 0);
+		String s = "Boost";
 		ItemMeta im = item.getItemMeta();
 		im.setDisplayName(disp);
 		if (s != null && s != ""){

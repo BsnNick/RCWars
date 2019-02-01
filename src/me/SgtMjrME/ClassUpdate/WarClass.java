@@ -6,10 +6,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import me.SgtMjrME.RCWars;
 import me.SgtMjrME.Util;
-//import me.SgtMjrME.ClassUpdate.Abilities.None;
-import me.SgtMjrME.Object.Race;
-import me.SgtMjrME.Object.WarPlayers;
-import me.SgtMjrME.Object.WarPoints;
+import me.SgtMjrME.object.Race;
+import me.SgtMjrME.object.WarPlayers;
+import me.SgtMjrME.object.WarPoints;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

@@ -9,8 +9,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
-import me.SgtMjrME.Object.Race;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
@@ -21,6 +19,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+
+import me.SgtMjrME.object.Race;
 
 public class Util {
 	
@@ -274,8 +274,7 @@ public class Util {
 			Player player = Bukkit.getServer().getPlayer(p);
 			if (player == null)
 				return;
-			Util.sendMessage(player, ChatColor.RED
-					+ "Error: Please tell a mod and refrain from re-entering wars (savePlayer)");
+			Util.sendMessage(player, C.cRed + "Unfortunately, an error has occurred. Please report this to a staff member and do not re-enter RCWars: " + C.cGold + "(savePlayer)");
 			System.err.println("Error: " + e1.getMessage());
 		}
 	}
@@ -285,14 +284,16 @@ public class Util {
 		p.sendMessage(message);
 	}
 	
-	public static void sendMessage(CommandSender p, String message){sendMessage(p, message, true);}
+	public static void sendMessage(CommandSender p, String message){
+		sendMessage(p, message, true);
+	}
 	
 	public static void sendLog(String s, boolean tag){
-		if (tag) s = "[RCWARS]" + s;
+		if (tag) s = "[RCWars]" + s;
 		l.info(s);
 	}
 	
 	public static void sendLog(String s){
-		sendLog(s,true);
+		sendLog(s, true);
 	}
 }
