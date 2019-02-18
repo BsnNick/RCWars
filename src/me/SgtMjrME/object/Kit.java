@@ -9,6 +9,7 @@ import me.SgtMjrME.RCWars;
 import me.SgtMjrME.Util;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.ConfigurationSection;
@@ -16,6 +17,7 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class Kit {
@@ -57,9 +59,15 @@ public class Kit {
 		}
 		if (!cfg.isConfigurationSection("items")) return;
 		for(String cs : cfg.getConfigurationSection("items").getKeys(false)){
-			ItemStack it = new ItemStack(cfg.getInt("items." + cs + ".itemid"),
+			/*ItemStack it = new ItemStack(cfg.getInt("items." + cs + ".itemid"),
 					cfg.getInt("items." + cs + ".itemqty"),
-					(short) cfg.getInt("items." + cs + ".itemdat"));
+					(short) cfg.getInt("items." + cs + ".itemdat"));*/
+		    
+		    ItemStack it = new ItemStack(Material.getMaterial(cfg.getString("items." + cs + ".itemid")), cfg.getInt("items." + cs + ".itemqty"));
+		    
+		    if (it.hasItemMeta() && it.getItemMeta() instanceof Damageable)
+                ((Damageable)it.getItemMeta()).setDamage((short)cfg.getInt("items." + cs + ".itemdat"));
+		    
 			String s = cfg.getString("items." + cs + ".lore");
 			if (s != null && s != ""){
 				ArrayList<String> lore = new ArrayList<String>();

@@ -6,6 +6,10 @@
 	<classpathentry kind="lib" path="D:/Workspace/Dependencies/Spigot/Essentials-2.x-SNAPSHOT-#30.jar"/>
 	<classpathentry kind="lib" path="D:/Workspace/Dependencies/Spigot/ProtocolLib-1.13.jar"/>
 	<classpathentry kind="lib" path="D:/Workspace/Dependencies/Spigot/Vault-1.13.jar"/>
-	<classpathentry kind="lib" path="D:/Workspace/Dependencies/Spigot/spigot-1.13.2.jar"/>
+	<classpathentry kind="lib" path="D:/Workspace/Dependencies/Spigot/spigot-1.13.2.jar" sourcepath="D:/Workspace/BuildTools/Spigot/Spigot-API/src/main/java">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/D:/Workspace/BuildTools/Spigot/Spigot-API/src/main/javadoc/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

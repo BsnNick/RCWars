@@ -11,6 +11,8 @@ import me.SgtMjrME.object.WarPlayers;
 import me.SgtMjrME.tasks.SpiderAgressor;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -133,9 +135,9 @@ public class MobHandler implements Listener{
 	public void onSpawn(PlayerInteractEvent e){
 		if (e.isCancelled()) return;
 		if (e.getPlayer() == null) return;
-		ItemStack item = e.getPlayer().getItemInHand();
+		ItemStack item = e.getPlayer().getInventory().getItemInMainHand();
 		if (item == null) return;
-		if (item.getTypeId() != 383) return;
+		if (item.getType().toString().toUpperCase().contains("SPAWN_EGG")) return; // 383 = Spawn egg
 		//Player was holding a spawn egg
 		if (!e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
 		//Player used on a block (mob should spawn, I think I need to force the spawn, I had hoped not)
@@ -151,15 +153,15 @@ public class MobHandler implements Listener{
 		if (egg.getSpawnedType().equals(EntityType.HORSE)){
 			Horse horse = (Horse) entity;
 			horse.setTamed(true);
-			horse.getInventory().setSaddle(new ItemStack(329,1));
-			horse.getInventory().setArmor(new ItemStack(418,1));
+			horse.getInventory().setSaddle(new ItemStack(Material.SADDLE, 1)); // 329 = Saddle
+			horse.getInventory().setArmor(new ItemStack(Material.GOLDEN_HORSE_ARMOR, 1)); // 418 = Golden horse armor
 		} else if (egg.getSpawnedType().equals(EntityType.SKELETON)){
 			Skeleton skele = (Skeleton) entity;
-			skele.getEquipment().setHelmet(new ItemStack(298,1));
-			skele.getEquipment().setItemInHand(new ItemStack(261,1));
+			skele.getEquipment().setHelmet(new ItemStack(Material.LEATHER_HELMET, 1)); // 298 = Leather helmet
+			skele.getEquipment().setItemInHand(new ItemStack(Material.ARROW, 1)); // 261 = Arrow
 		} else if (egg.getSpawnedType().equals(EntityType.ZOMBIE)){
 			Zombie zomb = (Zombie) entity;
-			zomb.getEquipment().setHelmet(new ItemStack(298,1));
+			zomb.getEquipment().setHelmet(new ItemStack(Material.LEATHER_HELMET, 1)); // 298 = Leather helmet
 		} else if (egg.getSpawnedType().equals(EntityType.PIG_ZOMBIE)){
 			PigZombie pig = (PigZombie) entity;
 			pig.setAngry(true);

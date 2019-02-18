@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import me.SgtMjrME.RCWars;
 import me.SgtMjrME.Util;
@@ -47,6 +48,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
@@ -70,6 +72,7 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -79,9 +82,9 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class PlayerListenerNew implements Listener {
 	private HashMap<String, Long> times = new HashMap<String, Long>();
 	private RCWars pl;
-	public HashMap<Player, String> modifyInv = new HashMap<Player, String>();
+	public HashMap<Player, Player> modifyInv = new HashMap<Player, Player>();
 
-	public HashMap<String, Integer> invType = new HashMap<String, Integer>();
+	public HashMap<UUID, Integer> invType = new HashMap<UUID, Integer>(); // Player name String -> Player UUID
 	
 	public HashMap<String, ItemStack[]> itemsReturn = new HashMap<String, ItemStack[]>();
 
@@ -182,7 +185,7 @@ public class PlayerListenerNew implements Listener {
 			AbilityTimer.onJoin(e.getPlayer(), e);
 		}
 		e.getPlayer().setWalkSpeed(0.2F);
-		WarPoints.loadWarPoints(e.getPlayer().getName());//Needs its own server!
+		WarPoints.loadWarPoints(e.getPlayer().getUniqueId()); //Needs its own server! Player#getName() -> Player#getUniqueId()
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -257,7 +260,7 @@ public class PlayerListenerNew implements Listener {
 		if (!(e.getWhoClicked() instanceof Player))
 			return;
 		if ((modifyInv.containsKey(e.getWhoClicked()))
-				&& (((Integer) invType.get(modifyInv.get(e.getWhoClicked())))
+				&& (((Integer) invType.get(modifyInv.get(e.getWhoClicked()).getUniqueId()))
 						.intValue() == 1) && (e.getSlot() >= 40)) {
 			Util.sendMessage(((Player) e.getWhoClicked()), "Modifying this would erase the item");
 			e.setCancelled(true);
@@ -304,7 +307,7 @@ public class PlayerListenerNew implements Listener {
 			pl.kitOnSpawn.addKit(e.getPlayer());
 		}
 		e.getPlayer().getInventory()
-				.setHelmet(new ItemStack(35, 1, r.getColor().byteValue()));
+				.setHelmet(new ItemStack(r.getRaceWool(), 1/*, r.getColor().byteValue()*/)); // 1 Wool
 		final WarRank wr = WarRank.getPlayer(e.getPlayer());
 		if (wr == null)
 			Bukkit.getScheduler().runTaskLater(pl, new Runnable(){
@@ -344,8 +347,7 @@ public class PlayerListenerNew implements Listener {
 	private void removeItems(Player p){
 		for (int i = 0; i < 54; i++) {
 			if (p.getInventory().getItem(i) != null
-					&& !RCWars.allowedItems.contains(p.getInventory()
-							.getItem(i).getTypeId()))
+					&& !RCWars.allowedItems.contains(p.getInventory().getItem(i).getType()))
 				p.getInventory().setItem(i, null);
 		}
 	}
@@ -442,12 +444,18 @@ public class PlayerListenerNew implements Listener {
 			return;
 		if (!e.getClickedBlock().getWorld().equals(pl.getWarWorld()))
 			return;
-		if ((e.getPlayer().getItemInHand().getTypeId() == 397)
+		if ((e.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.PLAYER_HEAD)) // 397 = Skull/player head
 				&& (headLoc.contains(e.getClickedBlock().getLocation()))) {
-			if (!e.getClickedBlock().getType().equals(Material.SKULL))
-				e.getClickedBlock().setType(Material.SKULL);
+			if (!e.getClickedBlock().getType().equals(Material.PLAYER_HEAD))
+				e.getClickedBlock().setType(Material.PLAYER_HEAD);
+			
+			/*ItemStack item = new ItemStack(Material.PLAYER_HEAD);
+            SkullMeta meta = (SkullMeta)item.getItemMeta();
+            meta.setOwningPlayer(Bukkit.getOfflinePlayer(id));
+            item.setItemMeta(meta);
+			
 			Skull skull = (Skull) e.getClickedBlock().getState();
-			skull.setSkullType(SkullType.PLAYER);
+			//skull.setSkullType(SkullType.PLAYER);
 			SkullMeta meta = (SkullMeta) e.getPlayer().getItemInHand()
 					.getItemMeta();
 			skull.setOwner(meta.getOwner());
@@ -458,7 +466,7 @@ public class PlayerListenerNew implements Listener {
 					&& (!e.getBlockFace().equals(BlockFace.DOWN)))
 				skull.setRotation(e.getBlockFace());
 			skull.update(true);
-			e.getPlayer().setItemInHand(null);
+			e.getPlayer().setItemInHand(null);*/ // TODO: Player heads
 		}
 
 		c = Cannon.isCannonButton(e.getClickedBlock().getLocation());
@@ -488,7 +496,7 @@ public class PlayerListenerNew implements Listener {
 			Location l = e.getClickedBlock().getLocation().clone();
 			l.setY(e.getPlayer().getEyeLocation().getY());
 			int count = 0;
-			while (l.getBlock().getTypeId() != 0) {
+			while (!l.getBlock().getType().equals(Material.AIR)) {
 				l.setX(l.getX() + x);
 				l.setZ(l.getZ() + z);
 				if (count++ > 10) {
@@ -505,7 +513,7 @@ public class PlayerListenerNew implements Listener {
 			e.getPlayer().teleport(l);
 		}
 
-		if (e.getPlayer().getItemInHand().getType().equals(Material.FIREBALL))
+		if (e.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.FIRE_CHARGE))
 			e.setCancelled(true);
 	}
 
@@ -533,13 +541,13 @@ public class PlayerListenerNew implements Listener {
 		}
 		try {
 			if (state.getLine(1).equals("MobHead")) {
-				Util.sendMessage(p, "itemid " + p.getItemInHand().getTypeId());
-				if (p.getItemInHand().getTypeId() != 397)
+				Util.sendMessage(p, "itemid " + p.getInventory().getItemInMainHand().getType());
+				if (p.getInventory().getItemInMainHand().getType().equals(Material.PLAYER_HEAD)) // 397 = Skull/player head
 					return;
 				int val = Integer.parseInt(state.getLine(3));
 				WarPoints.giveWarPoints(p,
-						val * p.getItemInHand().getAmount());
-				p.setItemInHand(null);
+						val * p.getInventory().getItemInMainHand().getAmount());
+				p.getInventory().setItemInMainHand(null);
 				return;
 			}
 		} catch (Exception e) {
@@ -652,8 +660,7 @@ public class PlayerListenerNew implements Listener {
 			}
 			mat = Material.getMaterial(state.getLine(1));
 			if (mat == null) {
-				mat = Material.getMaterial(Integer.parseInt(state
-						.getLine(1)));
+				mat = Material.getMaterial(state.getLine(1));
 				if (mat == null) {
 					Util.sendMessage(p, "Error with sign(mat)");
 					return;
@@ -768,7 +775,7 @@ public class PlayerListenerNew implements Listener {
 		if ((!e.isCancelled())
 				&& (e.getAction().equals(Action.RIGHT_CLICK_BLOCK))) {
 			Block block = e.getClickedBlock();
-			if (block.getTypeId() == 130) {
+			if (block.getType().equals(Material.ENDER_CHEST)) { // 130 = Ender Chest
 				if (e.getPlayer().getWorld().equals(pl.getWarWorld())) {
 					e.setCancelled(true);
 					if ((invTime.containsKey(e.getPlayer().getName()))
@@ -793,24 +800,24 @@ public class PlayerListenerNew implements Listener {
 		if (!e.getInventory().getType().equals(InventoryType.CHEST))
 			return;
 		if (modifyInv.containsKey(e.getPlayer())) {
-			if (((Integer) invType.get(modifyInv.get(e.getPlayer())))
+			if (((Integer) invType.get(modifyInv.get(e.getPlayer()).getUniqueId()))
 					.intValue() == 0)
-				savePlayer((String) modifyInv.get(e.getPlayer()), e
+				savePlayer(modifyInv.get(e.getPlayer()).getUniqueId(), e // Player#getName() -> Player#getUniqueId()
 						.getInventory().getContents());
-			else if (((Integer) invType.get(modifyInv.get(e.getPlayer())))
+			else if (((Integer) invType.get(modifyInv.get(e.getPlayer()).getUniqueId()))
 					.intValue() == 1)
-				Util.savePlayer((String) modifyInv.get(e.getPlayer()),
+				Util.savePlayer(modifyInv.get(e.getPlayer()).getUniqueId(), // Player#getName() -> Player#getUniqueId()
 						"WarItems", e.getInventory().getContents());
-			invType.remove(modifyInv.get(e.getPlayer()));
+			invType.remove(modifyInv.get(e.getPlayer()).getUniqueId());
 			modifyInv.remove(e.getPlayer());
 			return;
 		}
 		if (!e.getPlayer().getWorld().equals(pl.getWarWorld()))
 			return;
-		savePlayer(e.getPlayer().getName(), e.getInventory().getContents());
+		savePlayer(e.getPlayer().getUniqueId(), e.getInventory().getContents()); // Player#getName() -> Player#getUniqueId()
 	}
 
-	public void openBankOther(Player player, String other) {
+	public void openBankOther(Player player, Player other) {
 		if (checkValid(other)) {
 			Util.sendMessage(player, "Already being edited");
 			return;
@@ -821,31 +828,31 @@ public class PlayerListenerNew implements Listener {
 			return;
 		}
 		modifyInv.put(player, other);
-		invType.put(other, Integer.valueOf(0));
+		invType.put(other.getUniqueId(), Integer.valueOf(0));
 		player.openInventory(i);
 	}
 
 	public void openBankOwn(Player player) {
-		if (checkValid(player.getName())) {
+		if (checkValid(player)) {
 			Util.sendMessage(player, "Bank is being checked, ask a mod for details");
 			return;
 		}
-		Inventory i = openBank(player.getName(), player);
+		Inventory i = openBank(player, player); // Player#getName() -> Player#getUniqueId()
 		if (i == null)
 			i = pl.getServer().createInventory(player, 54,
 					player.getName() + " War Bank");
 		player.openInventory(i);
 	}
 
-	private boolean checkValid(String p) {
+	private boolean checkValid(Player p) {
 		return modifyInv.values().contains(p);
 	}
 
-	private Inventory openBank(String player, Player owner) {
+	private Inventory openBank(Player player, Player owner) {
 		Inventory i = pl.getServer().createInventory(owner, 54,
-				ChatColor.stripColor(player) + " War Bank");
+				ChatColor.stripColor(player.getName()) + " War Bank");
 		try {
-			if (!readInv(player, i))
+			if (!readInv(player.getUniqueId(), i))
 				return null;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -853,17 +860,17 @@ public class PlayerListenerNew implements Listener {
 		return i;
 	}
 
-	public static void savePlayer(String p, ItemStack[] items) {
+	public static void savePlayer(UUID p, ItemStack[] items) {
 		try {
 			String directory = RCWars.returnPlugin().getDataFolder()
 					.getAbsolutePath()
 					+ "/Banks/";
 			if (p == null)
 				return;
-			File f = new File(directory + p.toLowerCase() + ".txt");
+			File f = new File(directory + p.toString() + ".txt"); // Player#getName() -> Player#getUniqueId()
 			if (!f.exists())
 				f.createNewFile();
-			FileWriter fstream = new FileWriter(directory + p.toLowerCase()
+			FileWriter fstream = new FileWriter(directory + p.toString() // Player#getName() -> Player#getUniqueId()
 					+ ".txt");
 			BufferedWriter out = new BufferedWriter(fstream);
 			if (items == null) {
@@ -874,11 +881,11 @@ public class PlayerListenerNew implements Listener {
 				return;
 			}
 			for (ItemStack tempItem : items) {
-				if (tempItem == null) {
+				/*if (tempItem == null) {
 					out.write("0");
 					out.newLine();
 				} else {
-					out.write(tempItem.getTypeId() + " " + tempItem.getAmount()
+					out.write(tempItem.getType() + " " + tempItem.getAmount()
 							+ " " + tempItem.getDurability() + " "
 							+ tempItem.getData().getData());
 					for (Enchantment e : tempItem.getEnchantments().keySet()) {
@@ -897,7 +904,9 @@ public class PlayerListenerNew implements Listener {
 											.getStoredEnchantLevel(tempEnchant));
 					}
 					out.newLine();
-				}
+				}*/
+			    
+			    //TODO: Item serialization, preferrably natively supplied by Bukkit.
 			}
 			out.close();
 			fstream.close();
@@ -918,7 +927,7 @@ public class PlayerListenerNew implements Listener {
 		return result;
 	}
 
-	public static boolean readInv(String p, Inventory i) throws Exception {
+	public static boolean readInv(UUID p, Inventory i) throws Exception {
 		int count = 0;
 		try {
 			if (p == null)
@@ -926,7 +935,7 @@ public class PlayerListenerNew implements Listener {
 			String directory = RCWars.returnPlugin().getDataFolder()
 					.getAbsolutePath()
 					+ "/Banks/";
-			File f = new File(directory + p.toLowerCase() + ".txt");
+			File f = new File(directory + p + ".txt");
 			if (!f.exists()) {
 				f.createNewFile();
 				return false;
@@ -940,13 +949,22 @@ public class PlayerListenerNew implements Listener {
 					count++;
 				} else {
 					String[] items = s.split(" ");
-					int type = Race.toInt(items[0]);
+					//int type = Race.toInt(items[0]);
+					Material type = Material.getMaterial(items[0]);
 					int amt = Race.toInt(items[1]);
-					short dur = (short) Race.toInt(items[2]);
+					int dur = Race.toInt(items[2]);
 
-					ItemStack setItem = new ItemStack(type, amt, dur);
+					ItemStack setItem = new ItemStack(type, amt/*, dur*/);
+					if (setItem.hasItemMeta())
+					    if (setItem.getItemMeta() instanceof Damageable)
+					    {
+					        ItemMeta im = setItem.getItemMeta();
+					        ((Damageable)im).setDamage(dur);
+					        setItem.setItemMeta(im);
+					    }
+					
 					if ((items.length > 4) && (items.length % 2 == 0)) {
-						if (setItem.getTypeId() == 403) {
+						/*if (setItem.getType().equals(Material.ENCHANTED_BOOK)) { // 403 = Enchanted Book
 							for (int x = 4; x < items.length; x += 2)
 								((EnchantmentStorageMeta) setItem.getItemMeta())
 										.addStoredEnchant(Enchantment
@@ -959,7 +977,7 @@ public class PlayerListenerNew implements Listener {
 										.getById(Race.toInt(items[x])), Race
 										.toInt(items[(x + 1)]));
 							}
-						}
+						}*/ //TODO: Fix enchants (or migrate to Bukkit serialization)
 					}
 					i.setItem(count, setItem);
 					count++;
@@ -970,7 +988,7 @@ public class PlayerListenerNew implements Listener {
 			return true;
 		} catch (Exception e) {
 			Bukkit.getLogger()
-					.info("Error saving player " + p + " at " + count);
+					.info("Error saving player (" + p + ") at " + count);
 		}
 		return false;
 	}
@@ -979,7 +997,13 @@ public class PlayerListenerNew implements Listener {
 	public void onItemBreak(PlayerItemBreakEvent e) {
 		if (WarPlayers.getRace(e.getPlayer()) != null) {
 			e.getBrokenItem().setAmount(e.getBrokenItem().getAmount());
-			e.getBrokenItem().setDurability((short) 0);
+			
+			ItemMeta im = e.getBrokenItem().getItemMeta();
+			if (im != null && im instanceof Damageable)
+			{
+			    ((Damageable)im).setDamage(0);
+			    e.getBrokenItem().setItemMeta(im);
+			}
 		}
 	}
 
@@ -988,16 +1012,19 @@ public class PlayerListenerNew implements Listener {
 		WarRank wr = WarRank.getPlayer(e.getPlayer());
 		if (wr == null)
 			return;
-		int typeid = e.getItemDrop().getItemStack().getTypeId();
-		if (typeid == 366 || typeid == 262) return;
+		Material typeid = e.getItemDrop().getItemStack().getType();
+		if (typeid.equals(Material.COOKED_CHICKEN) || typeid.equals(Material.ARROW)) return; // 366 = Cooked Chicken, 262 = Arrow
 		e.setCancelled(true);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onPickup(PlayerPickupItemEvent e) {
-		Race r = WarPlayers.getRace(e.getPlayer());
-		if ((r != null) && (r.isRef()))
-			e.setCancelled(true);
+	public void onPickup(EntityPickupItemEvent e) {
+	    if (e.getEntity() instanceof Player)
+	    {
+	        Race r = WarPlayers.getRace((Player)e.getEntity());
+	        if ((r != null) && (r.isRef()))
+	            e.setCancelled(true);
+	    }
 	}
 	
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -1025,33 +1052,40 @@ public class PlayerListenerNew implements Listener {
 		Player dead = e.getEntity();
 	    Player killer = e.getEntity().getKiller();
 	    if ((killer == null) && 
-	      (EntityListener.explDmg.containsKey(dead.getName()))) {
-	      killer = Bukkit.getPlayer((String)EntityListener.explDmg.remove(dead.getName()));
+	      (EntityListener.explDmg.containsKey(dead.getUniqueId()))) { // Player#getName() -> Player#getUniqueId()
+	      killer = Bukkit.getPlayer((String)EntityListener.explDmg.remove(dead.getUniqueId())); // Player#getName() -> Player#getUniqueId()
 	    }
 	    ExperienceOrb o = (ExperienceOrb)dead.getWorld().spawnEntity(dead.getLocation(), EntityType.EXPERIENCE_ORB);
 	    o.setExperience(e.getDroppedExp());
 	    e.setDroppedExp(0);
 	    ArrayList<ItemStack> toreturn = new ArrayList<ItemStack>();
-	    if (WarPlayers.isPlaying(dead.getName())) {
+	    if (WarPlayers.isPlaying(dead.getUniqueId())) { // Player#getName() -> Player#getUniqueId()
 	    	Iterator<ItemStack> i = e.getDrops().iterator();
 	    	while(i.hasNext()) {
 	    		ItemStack itemStack = i.next();
 	    		if (itemStack == null){
 	    			continue;
 	    		}
-	    		else if (RCWars.allowedItems.contains(itemStack.getTypeId())){
+	    		else if (RCWars.allowedItems.contains(itemStack.getType())){
 	    			toreturn.add(itemStack);
 	    		}
-	    		if (!RCWars.dropItems.contains(itemStack.getTypeId()))
+	    		if (!RCWars.dropItems.contains(itemStack.getType()))
 	    			i.remove();
 	    	}
 	    	if (toreturn.size() != 0) itemsReturn.put(e.getEntity().getName(), toreturn.toArray(new ItemStack[0]));
-	    	ItemStack is = new ItemStack(Material.SKULL_ITEM, 1);
-	    	is.setDurability((short)3);
+	    	/*ItemStack is = new ItemStack(Material.PLAYER_HEAD, 1);
+	    	//is.setDurability((short)3);
 	    	SkullMeta meta = (SkullMeta)is.getItemMeta();
 	    	meta.setOwner(dead.getName());
 	    	is.setItemMeta(meta);
-	    	e.getDrops().add(is);
+	    	e.getDrops().add(is);*/
+	    	
+	    	ItemStack item = new ItemStack(Material.PLAYER_HEAD, 1);
+	    	SkullMeta sm = (SkullMeta)item.getItemMeta();
+	    	sm.setOwningPlayer(e.getEntity());
+	    	item.setItemMeta(sm);
+	    	e.getDrops().add(item);
+	    	
 	    	RCWars.logKill(dead, killer);
 	    }
 	  }

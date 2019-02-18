@@ -2,9 +2,10 @@ name: RCWars
 authors: [SgtMjrME, 000Nick]
 main: me.SgtMjrME.RCWars
 version: 4.0
-description: Wars 4.0, the 1.8 update by 000Nick.
+description: Wars 4.0, the 1.8-1.13 update by 000Nick.
 softdepend: [Essentials]
 depends: [Vault]
+api-version: 1.13
 
 commands:
     startwar:
@@ -18,7 +19,7 @@ commands:
     resetWarStats:
         description: console only, resets the database (clears entries)
     warthanks:
-        description: By SgtMjrME, updated to 1.8 for v4.0 by 000Nick
+        description: By SgtMjrME, updated to 1.8-1.13 for v4.0 by 000Nick
     wsetworld:
         description: set the world
     wsetlobby:

@@ -60,7 +60,7 @@ public class ScoreboardHandler implements Runnable{
 	}
 	
 	private void resetObjectives(){
-		maxKillsObj = maxKills.registerNewObjective("leaderboard", "dummy");
+		maxKillsObj = maxKills.registerNewObjective("leaderboard", "dummy"); // TODO: Update & fix deprecation of leaderboards
 		maxKillsObj.setDisplayName("Top Killers");
 		maxKillsObj.setDisplaySlot(DisplaySlot.SIDEBAR);
 		maxDeathsObj = maxDeaths.registerNewObjective("leaderboard", "dummy");
@@ -126,7 +126,7 @@ public class ScoreboardHandler implements Runnable{
 		Bukkit.getScheduler().runTaskAsynchronously(RCWars.returnPlugin(), new Runnable(){
 			@Override
 			public void run(){
-				final int[] stats = RCWars.returnPlugin().mysql.getStats(p.getName());
+				final int[] stats = RCWars.returnPlugin().mysql.getStats(p.getUniqueId()); // Player#getName() -> Player#getUniqueId()
 				Bukkit.getScheduler().runTask(RCWars.returnPlugin(), new Runnable(){
 					@Override
 					public void run(){
@@ -248,14 +248,14 @@ public class ScoreboardHandler implements Runnable{
 			}
 	}
 
-	private static Skull handleSkullCheck(YamlConfiguration cfg, String s){
+	private static Skull handleSkullCheck(YamlConfiguration cfg, String s) { // TODO
 		try{
 		String str = cfg.getString(s);
 		if (str == null) return null;
 		Location l = RCWars.returnPlugin().str2Loc(str);
 		if (l == null) return null;
 		Block b = l.getBlock();
-		if (b != null && b.getType() == Material.SKULL){
+		if (b != null && (b.getType().equals(Material.PLAYER_HEAD) || b.getType().equals(Material.PLAYER_WALL_HEAD))) {
 			Skull skull = (Skull) b.getState();
 			return skull;
 		}

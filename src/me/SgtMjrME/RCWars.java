@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import me.SgtMjrME.ClassUpdate.WarClass;
@@ -21,7 +22,6 @@ import me.SgtMjrME.listeners.BlockListener;
 import me.SgtMjrME.listeners.EntityListener;
 import me.SgtMjrME.listeners.MobHandler;
 import me.SgtMjrME.listeners.PlayerListenerNew;
-import me.SgtMjrME.listeners.TagAPIListener;
 import me.SgtMjrME.object.Base;
 import me.SgtMjrME.object.Kit;
 import me.SgtMjrME.object.Race;
@@ -41,6 +41,7 @@ import me.SgtMjrME.tasks.timedExp;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -53,6 +54,7 @@ import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -70,7 +72,6 @@ public class RCWars extends JavaPlugin {
 	private PlayerListenerNew playerListener;
 	private BlockListener blockListener;
 	private EntityListener entityListener;
-	private TagAPIListener tagAPIListener;
 	private MobHandler mobHandler;
 	public WarPoints warPoints;
 	private static int killWp;
@@ -130,25 +131,27 @@ public class RCWars extends JavaPlugin {
 	 	Color the ability names
 	 * UPDATE #12: DONE (tested)
 	    Update to 1.8 (-000Nick)
-	 * UPDATE #13: WIP (untested)
+	 * UPDATE #13: DONE (testeds)
 	    Optimize code; add some cosmetics; prepare for next RC server (-000Nick)
 	 	
 	 	??? EMERGENCY
 	 	Bug: Healmage teleports (tested)
-	 	        Healmage heatlh TESTING
+	 	        Healmage health TESTING
 	 	        
 	 	I have updated the plugin to 1.8! Things may/are probably broken,
 	 	report these bugs to my Discord at 'Nick つ ◕_◕ ༽つ#5942'. -000Nick
-	 	        
+	 * UPDATE #14: WIP
+	    Updating plugin to 1.13 & updated to account for The Flattenning. -000Nick
+	    Credits: RockinMC (rockindavies21) for re-supplying old configs necessary for function of plugin
 	 */
 
-	public static HashSet<Integer> allowedItems = new HashSet<Integer>();
+	public static HashSet<Material> allowedItems = new HashSet<Material>();
 
 	public static HashMap<Race, Rally> rallyDat = new HashMap<Race, Rally>();
 
-	public static HashSet<Integer> dropItems = new HashSet<Integer>();
+	public static HashSet<Material> dropItems = new HashSet<Material>(); // Integer (Item ID's) -> Material
 
-	public static HashMap<String, Integer> repairing = new HashMap<String, Integer>();
+	public static HashMap<UUID, Integer> repairing = new HashMap<UUID, Integer>();
 	boolean open;
 	private int timedWarPoints;
 
@@ -170,12 +173,10 @@ public class RCWars extends JavaPlugin {
 		blockListener = new BlockListener(this);
 		entityListener = new EntityListener(this);
 		mobHandler = new MobHandler();
-		tagAPIListener = new TagAPIListener();
 		pm.registerEvents(playerListener, this);
 		pm.registerEvents(blockListener, this);
 		pm.registerEvents(entityListener, this);
 		pm.registerEvents(mobHandler, this);
-		pm.registerEvents(tagAPIListener, this);
 
 		config = new YamlConfiguration();
 		try {
@@ -235,12 +236,16 @@ public class RCWars extends JavaPlugin {
 		String[] ditems = config.getString("droppableitems", "").split(";");
 		for (String s : ditems)
 			try {
-				dropItems.add(Integer.parseInt(s));
+			    Material matCheck = Material.getMaterial(s);
+			    if (matCheck == null) // If String is not new Material, check if old Material
+			        matCheck = Material.getMaterial(s, true);
+			    if (matCheck != null)
+			        dropItems.add(Material.getMaterial(s));
 			} catch (Exception localException) {
 			}
 		String[] block = config.getString("allowedItems", "").split(",");
 		for (String bl : block) {
-			allowedItems.add(Integer.parseInt(bl));
+			allowedItems.add(Material.getMaterial(bl));
 		}
 		
 		/* TODO
@@ -366,6 +371,9 @@ public class RCWars extends JavaPlugin {
 //		}
 //	}
 
+	/**
+	 * Static abuse! Plugin is too big at this point to change.
+	 */
 	public static RCWars returnPlugin() {
 		return instance;
 	}
@@ -481,7 +489,7 @@ public class RCWars extends JavaPlugin {
 			} else if (commandLabel.equalsIgnoreCase("wlist")) {
 				for (Race r : Race.getAllRaces()) {
 					String out = r.getCcolor() + r.getDisplay() + ": ";
-					for (String s : r.returnPlayers().keySet()) {
+					for (UUID s : r.returnPlayers().keySet()) {
 						out = out + s + ", ";
 					}
 					Util.sendMessage(sender, out, false);
@@ -534,44 +542,19 @@ public class RCWars extends JavaPlugin {
 			HandlerList.unregisterAll(this);
 			for (Player players : world.getPlayers()) {
 				players.teleport(lobby);
-				if (players.getInventory().getHelmet().getTypeId() == 35)
+				if (players.getInventory().getHelmet().getType().toString().contains("WOOL")) // Item ID 35 = Wool; 1.13: check if Material#toString() contains 'WOOL'
 					players.getInventory().setHelmet(null);
 			}
 			onEnable();
 		} else if (commandLabel.equalsIgnoreCase("warthanks")) {
-			Util.sendMessage(p, "Credits: " + ChatColor.GOLD + "Richard Johnson (SergeantMajorME), Nick B. (000Nick)", false);
+			Util.sendMessage(p, "Credits: " + ChatColor.GOLD + "Created by Richard Johnson (SergeantMajorME), Updated by Nick B. (000Nick)", false);
 			Util.sendMessage(p, "Produced originally for " + ChatColor.GOLD + "RealmCraft!", false);
 			Util.sendMessage(p, getDescription().getFullName() + " " + getDescription().getDescription(), false);
-			if ((p.getName().equalsIgnoreCase("SergeantMajorME") || (p.getName().equalsIgnoreCase("000Nick")))) {
-				if (args.length < 4)
-					return true;
-				int type = Race.toInt(args[0]);
-				int amt = Race.toInt(args[1]);
-				short dur = (short) Race.toInt(args[2]);
-
-				ItemStack setItem = new ItemStack(type, amt, dur);
-				if ((args.length > 4) && (args.length % 2 == 0)) {
-					if (setItem.getTypeId() == 403) {
-						for (int x = 4; x < args.length; x += 2)
-							((EnchantmentStorageMeta) setItem.getItemMeta())
-									.addStoredEnchant(Enchantment
-											.getById(Race.toInt(args[x])),
-											Race.toInt(args[(x + 1)]), true);
-					} else {
-						for (int x = 4; x < args.length; x += 2) {
-							setItem.addUnsafeEnchantment(Enchantment
-									.getById(Race.toInt(args[x])), Race
-									.toInt(args[(x + 1)]));
-						}
-					}
-				}
-				p.getInventory().addItem(new ItemStack[] { setItem });
-			}
 			return true;
 		} else if (commandLabel.equalsIgnoreCase("wlist")) {
 			for (Race r : Race.getAllRaces()) {
 				String out = r.getCcolor() + r.getDisplay() + ": ";
-				for (String s : r.returnPlayers().keySet()) {
+				for (UUID s : r.returnPlayers().keySet()) {
 					out = out + s + ", ";
 				}
 				Util.sendMessage(sender, out, false);
@@ -715,8 +698,7 @@ public class RCWars extends JavaPlugin {
 						+ "Invisibility not allowed in wars!");
 				return true;
 			}
-			if (playerListener.modifyInv.containsValue(p
-					.getName())) {
+			if (playerListener.modifyInv.containsValue(p)) {
 				Util.sendMessage(p, "Cannot join wars: Inventory being investigated");
 				return true;
 			}
@@ -936,7 +918,7 @@ public class RCWars extends JavaPlugin {
 				Util.sendMessage(p, "Player has no bank");
 				return false;
 			}
-			playerListener.openBankOther(p, args[0]);
+			playerListener.openBankOther(p, Bukkit.getPlayer(args[0]));
 			return true;
 		} else if ((commandLabel.equalsIgnoreCase("warinv"))
 				&& (p.hasPermission("rcwars.mod"))) {
@@ -964,70 +946,75 @@ public class RCWars extends JavaPlugin {
 				Util.sendMessage(p, args[0] + " not found");
 				return false;
 			}
-			playerListener.modifyInv.put(p, args[0]);
-			playerListener.invType.put(args[0], 1);
-			Inventory i = getServer().createInventory(
-					p, 54, args[0] + " War Inventory");
-			try {
-				FileReader in = new FileReader(f);
-				BufferedReader data = new BufferedReader(
-						in);
-				int count = 0;
-				String s;
-				while (((s = data.readLine()) != null)
-						&& (count < 40)) {
-					if (s.startsWith("0")) {
-						count++;
-						continue;
-					} else {
-						String[] items = s.split(" ");
-						int type = Race.toInt(items[0]);
-						int amt = Race.toInt(items[1]);
-						short dur = (short) Race
-								.toInt(items[2]);
-						ItemStack setItem = new ItemStack(
-								type, amt, dur);
-						if ((items.length > 4)
-								&& (items.length % 2 == 0)) {
-							if (setItem.getTypeId() == 403) {
-								for (int x = 4; x < items.length; x += 2)
-									((EnchantmentStorageMeta) setItem
-											.getItemMeta())
-											.addStoredEnchant(
-													Enchantment
-															.getById(Race
-																	.toInt(items[x])),
-													Race.toInt(items[(x + 1)]),
-													true);
-							} else {
-								for (int x = 4; x < items.length; x += 2) {
-									setItem.addUnsafeEnchantment(
-											Enchantment
-													.getById(Race
-															.toInt(items[x])),
-											Race.toInt(items[(x + 1)]));
-								}
-							}
-						}
-						i.setItem(count, setItem);
-						count++;
-					}
-				}
-				data.close();
-				in.close();
-				for (int x = 40; x < 54; x++)
-					i.setItem(x, new ItemStack(35, 1,
-							(short) 14));
-				p.openInventory(i);
-			} catch (Exception e) {
-				Util.sendMessage(p, "Error loading");
-				return false;
+			Player target = Bukkit.getPlayer(args[0]);
+			
+			if (target != null)
+			{
+			    playerListener.modifyInv.put(p, target);
+	            playerListener.invType.put(target.getUniqueId(), 1);
+	            Inventory i = getServer().createInventory(
+	                    p, 54, args[0] + " War Inventory");
+	            try {
+	                FileReader in = new FileReader(f);
+	                BufferedReader data = new BufferedReader(
+	                        in);
+	                int count = 0;
+	                String s;
+	                while (((s = data.readLine()) != null)
+	                        && (count < 40)) {
+	                    if (s.startsWith("0")) {
+	                        count++;
+	                        continue;
+	                    } else {
+	                        String[] items = s.split(" ");
+	                        int amt = Race.toInt(items[1]);
+	                        short dur = (short) Race.toInt(items[2]);
+	                        ItemStack setItem = new ItemStack(Material.getMaterial(items[0]), amt);
+	                        
+	                        if (setItem.hasItemMeta() && setItem.getItemMeta() instanceof Damageable)
+	                            ((Damageable)setItem.getItemMeta()).setDamage(dur);
+	                        
+	                        if ((items.length > 4)
+	                                && (items.length % 2 == 0)) {
+	                            if (setItem.getType().equals(Material.ENCHANTED_BOOK)) { // 403 = Enchanted book
+	                                for (int x = 4; x < items.length; x += 2) { // TODO
+	                                    /*((EnchantmentStorageMeta) setItem
+	                                            .getItemMeta())
+	                                            .addStoredEnchant(
+	                                                    Enchantment
+	                                                            .getById(Race
+	                                                                    .toInt(items[x])),
+	                                                    Race.toInt(items[(x + 1)]),
+	                                                    true);*/
+	                                }
+	                            } else {
+	                                for (int x = 4; x < items.length; x += 2) {
+	                                    /*setItem.addUnsafeEnchantment( TODO
+	                                            Enchantment
+	                                                    .getById(Race
+	                                                            .toInt(items[x])),
+	                                            Race.toInt(items[(x + 1)]));*/
+	                                }
+	                            }
+	                        }
+	                        i.setItem(count, setItem);
+	                        count++;
+	                    }
+	                }
+	                data.close();
+	                in.close();
+	                for (int x = 40; x < 54; x++)
+	                    //i.setItem(x, new ItemStack(35, 1, (short) 14)); // 1 Red Wool?
+	                    i.setItem(x, new ItemStack(Material.RED_WOOL, 1));
+	                p.openInventory(i);
+	            } catch (Exception e) {
+	                Util.sendMessage(p, "Error loading");
+	                return false;
+	            }
 			}
 		} else if ((commandLabel
 				.equalsIgnoreCase("specialwaraction"))
-				&& ((p.getName()
-						.equalsIgnoreCase("sergeantmajorme")) || (p
-						.hasPermission("rcwars.specialaction")))) {
+				&& (p.hasPermission("rcwars.specialaction"))) {
 			if (args.length == 0) {
 				Util.sendMessage(p, "Current action is");
 				Util.sendMessage(p, "View information on classes and ranks");
@@ -1245,9 +1232,9 @@ public class RCWars extends JavaPlugin {
 		while (bases.hasNext()) {
 			Base b = (Base) bases.next();
 			HashMap<Player, String> toDisplay = new HashMap<Player, String>();
-			Iterator<String> players = WarPlayers.listPlayers();
+			Iterator<UUID> players = WarPlayers.listPlayers();
 			while (players.hasNext()) {
-				String pstring = (String) players.next();
+				UUID pstring = players.next();
 				Player p = getServer().getPlayer(pstring);
 				if (p == null) {
 					WarPlayers.remove(pstring);
@@ -1291,12 +1278,12 @@ public class RCWars extends JavaPlugin {
 								+ b.getDisp() + ChatColor.GREEN + ": "
 								+ b.getDamage() + "/" + b.getHealth());
 						siege.repair(repairBaseVal);
-						if (!repairing.containsKey(p.getName()))
-							repairing.put(p.getName(), 1);
+						if (!repairing.containsKey(p.getUniqueId())) // Player#getName() -> Player#getUniqueId()
+							repairing.put(p.getUniqueId(), 1); // Player#getName() -> Player#getUniqueId()
 						else
-							repairing.put(p.getName(),
-									(Integer) repairing.get(p.getName()));
-						if (((Integer) repairing.get(p.getName())).intValue() % 10 == 0) {
+							repairing.put(p.getUniqueId(), // Player#getName() -> Player#getUniqueId()
+									(Integer) repairing.get(p.getUniqueId()));
+						if (((Integer) repairing.get(p.getUniqueId())).intValue() % 10 == 0) {
 							p.giveExp(baserepexp);
 							Util.sendMessage(p, ChatColor.GREEN + "Given "
 									+ baserepexp + " for repairing the base");
@@ -1358,9 +1345,9 @@ public class RCWars extends JavaPlugin {
 	}
 
 	public void checkSpawn() {
-		Iterator<String> players = WarPlayers.listPlayers();
+		Iterator<UUID> players = WarPlayers.listPlayers();
 		while (players.hasNext()) {
-			String pstring = (String) players.next();
+			UUID pstring = players.next();
 			Player p = getServer().getPlayer(pstring);
 			if (p != null) {
 				Iterator<Race> races = Race.getAllRaces().iterator();
@@ -1436,9 +1423,9 @@ public class RCWars extends JavaPlugin {
 					+ ChatColor.YELLOW + damageeName + ChatColor.RED
 					+ " died mysteriously...";
 		}
-		Iterator<String> p = WarPlayers.listPlayers();
+		Iterator<UUID> p = WarPlayers.listPlayers();
 		while (p.hasNext()) {
-			String pstring = (String) p.next();
+			UUID pstring = p.next();
 			Player player = returnPlugin().getServer().getPlayer(pstring);
 			if (player != null) {
 				Util.sendMessage(player, s);
@@ -1478,9 +1465,9 @@ public class RCWars extends JavaPlugin {
 		while (i.hasNext())
 			((Base) i.next()).resetBase();
 		String s = ChatColor.GREEN + "The War has begun!!!";
-		Iterator<String> p = WarPlayers.listPlayers();
+		Iterator<UUID> p = WarPlayers.listPlayers();
 		while (p.hasNext()) {
-			String pstring = (String) p.next();
+			UUID pstring = p.next();
 			Player player = returnPlugin().getServer().getPlayer(pstring);
 			if (player == null) {
 				WarPlayers.remove(pstring);
@@ -1509,9 +1496,9 @@ public class RCWars extends JavaPlugin {
 				new spawnCheck(this), 0L, 20L);
 
 		String s = ChatColor.GREEN + "The War has resumed!";
-		Iterator<String> p = WarPlayers.listPlayers();
+		Iterator<UUID> p = WarPlayers.listPlayers();
 		while (p.hasNext()) {
-			String pstring = (String) p.next();
+			UUID pstring = p.next();
 			Player player = returnPlugin().getServer().getPlayer(pstring);
 			if (player == null) {
 				WarPlayers.remove(pstring);
@@ -1529,9 +1516,9 @@ public class RCWars extends JavaPlugin {
 			Base b = (Base) bases.next();
 			b.resetGate();
 		}
-		Iterator<String> players = WarPlayers.listPlayers();
+		Iterator<UUID> players = WarPlayers.listPlayers();
 		while (players.hasNext()) {
-			String pstring = (String) players.next();
+			UUID pstring = players.next();
 			Player p = getServer().getPlayer(pstring);
 			if (p != null) {
 				Util.sendMessage(p, ChatColor.YELLOW
@@ -1606,9 +1593,9 @@ public class RCWars extends JavaPlugin {
 			}
 			basenum.put(r, count);
 		}
-		Iterator<String> p = WarPlayers.listPlayers();
+		Iterator<UUID> p = WarPlayers.listPlayers();
 		while (p.hasNext()) {
-			String pstring = (String) p.next();
+			UUID pstring = p.next();
 			Player player = getServer().getPlayer(pstring);
 			if (player == null) {
 				WarPlayers.remove(pstring);

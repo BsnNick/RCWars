@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -133,7 +134,7 @@ public class mysqlLink
 				}
 				try {
 					PreparedStatement s = con.prepareStatement("select * from "
-							+ database_name + ".data where name = \"" + p.getName()
+							+ database_name + ".data where name = \"" + p.getUniqueId() // Player#getName() -> Player#getUniqueId()
 							+ "\";");
 					ResultSet result = s.executeQuery();
 					if (result.next()) {
@@ -145,11 +146,11 @@ public class mysqlLink
 							addDeath(p);
 					} else {
 						Util.sendLog("[RCWars] Creating new table entry for "
-								+ p.getName());
+								+ p.getUniqueId() + "(" + p.getName() + ")"); // Player#getName() -> Player#getUniqueId()
 						PreparedStatement addPlayer = con
 								.prepareStatement("insert into " + database_name
 										+ ".data (name, kills, deaths, wp) values('"
-										+ p.getName() + "','0','0','0');");
+										+ p.getUniqueId() + "','0','0','0');"); // Player#getName() -> Player#getUniqueId()
 						addPlayer.executeUpdate();
 						updatePlayer(p, type);
 					}
@@ -180,7 +181,7 @@ public class mysqlLink
 			PreparedStatement add = con.prepareStatement("update "
 					+ database_name
 					+ ".data set kills = (kills + 1) where name = '"
-					+ p.getName() + "';");
+					+ p.getUniqueId() + "';"); // Player#getName() -> Player#getUniqueId()
 			add.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -192,7 +193,7 @@ public class mysqlLink
 			PreparedStatement add = con.prepareStatement("update "
 					+ database_name
 					+ ".data set deaths = (deaths + 1) where name = '"
-					+ p.getName() + "';");
+					+ p.getUniqueId() + "';"); // Player#getName() -> Player#getUniqueId()
 			add.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -203,16 +204,16 @@ public class mysqlLink
 		try {
 			PreparedStatement add = con.prepareStatement("update "
 					+ database_name + ".data set wp = wp + " + amt
-					+ " where name = '" + p.getName() + "';");
+					+ " where name = '" + p.getUniqueId() + "';"); // Player#getName() -> Player#getUniqueId()
 			add.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public int[] getStats(String p) {
+	public int[] getStats(UUID p) {
 		int[] out = new int[3];
-		for(int i = 0; i < 3; i++) out[i] = 0; //Really do this to make sure there is no nulls
+		for(int i = 0; i < 3; i++) out[i] = 0; //Really do this to make sure there are no nulls
 		try {
 			if (!con.isValid(0))
 				reestablishConnection();

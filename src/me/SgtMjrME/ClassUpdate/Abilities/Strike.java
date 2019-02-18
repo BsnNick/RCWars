@@ -23,7 +23,7 @@ public class Strike extends BaseAbility {
 		cost = cs.getInt("cost", 3);
 		delay = cs.getLong("delay", 30000);
 		desc = ChatColor.translateAlternateColorCodes('&', cs.getString("description", "(3 wp) Launches a critical strike"));
-		item = new ItemStack(Material.INK_SACK, 1, (short) 1);
+		item = new ItemStack(Material.ROSE_RED, 1); // Dye:1 = Rose Red
 		String s = "Strike";
 		ItemMeta im = item.getItemMeta();
 		im.setDisplayName(disp);

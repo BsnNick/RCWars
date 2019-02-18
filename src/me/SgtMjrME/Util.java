@@ -7,15 +7,18 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
@@ -37,12 +40,18 @@ public class Util {
 		}
 
 		String[] items = s.split(" ");
-		int type = toInt(items[0]);
+		//int type = toInt(items[0]);
 		int amt = toInt(items[1]);
 		short dur = (short) toInt(items[2]);
 
-		ItemStack setItem = new ItemStack(type, amt, dur);
-		if ((type > 298) && (type < 302)) {
+		//ItemStack setItem = new ItemStack(type, amt, dur);
+		ItemStack setItem = new ItemStack(Material.getMaterial(items[0]), amt);
+		
+		if (setItem.hasItemMeta() && setItem.getItemMeta() instanceof Damageable)
+		    ((Damageable)setItem.getItemMeta()).setDamage(dur);
+		
+		// 298 < type < 302;  Leather armor (minus helmet)
+		if (setItem.getType().equals(Material.LEATHER_CHESTPLATE) || setItem.getType().equals(Material.LEATHER_LEGGINGS) || setItem.getType().equals(Material.LEATHER_BOOTS)) {
 			LeatherArmorMeta meta = (LeatherArmorMeta) setItem.getItemMeta();
 			String[] color = items[3].split(";");
 			if (color.length == 3)
@@ -54,16 +63,17 @@ public class Util {
 				}
 		}
 		if ((items.length > 4) && (items.length % 2 == 0)) {
-			if (setItem.getTypeId() == 403) {
-				for (int x = 4; x < items.length; x += 2)
-					((EnchantmentStorageMeta) setItem.getItemMeta())
+			if (setItem.getType().equals(Material.ENCHANTED_BOOK)) { // 403 = Enchanted book
+				for (int x = 4; x < items.length; x += 2) {
+					((EnchantmentStorageMeta) setItem.getItemMeta()) //TODO: Enchantment
 							.addStoredEnchant(
-									Enchantment.getById(Race.toInt(items[x])),
+									Enchantment.getByName(items[x]),
 									Race.toInt(items[(x + 1)]), true);
+				}
 			} else {
 				for (int x = 4; x < items.length; x += 2) {
 					setItem.addUnsafeEnchantment(
-							Enchantment.getById(Race.toInt(items[x])),
+							Enchantment.getByName(items[x]), //TODO: Enchantment
 							Race.toInt(items[(x + 1)]));
 				}
 			}
@@ -156,33 +166,33 @@ public class Util {
 			allItemsBack = (ItemStack[]) concat(allItemsBack, (ItemStack[]) p
 					.getInventory().getArmorContents().clone());
 			if (!inWars)
-				savePlayer(p.getName(), "Backup", allItemsBack);
+				savePlayer(p.getUniqueId(), "Backup", allItemsBack); // Player#getName() -> Player#getUniqueId()
 			String directory = RCWars.returnPlugin().getDataFolder()
 					.getAbsolutePath();
 			if (inWars)
 				directory = directory + "/Items/";
 			else
 				directory = directory + "/WarItems/";
-			File f = new File(directory + p.getName().toLowerCase() + ".txt");
+			File f = new File(directory + p.getUniqueId() + ".txt"); // Player#getName().toLowerCase() -> Player#getUniqueId(); player names can be changed
 			if (!f.exists()) {
 				sendMessage(p, "No previous war data found");
 				if (!inWars)
 					savePlayer(
-							p.getName(),
+							p.getUniqueId(), // Player#getName() -> Player#getUniqueId()
 							"Items",
 							(ItemStack[]) concat(
 									p.getInventory().getContents(), p
 											.getInventory().getArmorContents()));
 				else
 					savePlayer(
-							p.getName(),
+							p.getUniqueId(), // Player#getName() -> Player#getUniqueId()
 							"WarItems",
 							(ItemStack[]) concat(
 									p.getInventory().getContents(), p
 											.getInventory().getArmorContents()));
 				Iterator<ItemStack> i = p.getInventory().iterator();
 				while(i.hasNext()){
-					if (!RCWars.allowedItems.contains(i.next().getTypeId())) i.remove(); 
+					if (!RCWars.allowedItems.contains(i.next().getType())) i.remove(); 
 				}
 //				for (int i = 0; i < p.getInventory().getArmorContents().length; i++) {
 					p.getInventory().setArmorContents(null);
@@ -196,7 +206,7 @@ public class Util {
 				ItemStack setItem = Util.str2Item(s);
 				if (count < 36){
 					if (p.getInventory().getItem(count) != null &&
-							!RCWars.allowedItems.contains(p.getInventory().getItem(count).getTypeId()))
+							!RCWars.allowedItems.contains(p.getInventory().getItem(count).getType()))
 							p.getInventory().setItem(count, setItem);
 				}
 				else if (count == 39)
@@ -212,25 +222,25 @@ public class Util {
 			data.close();
 			in.close();
 			if (!inWars)
-				savePlayer(p.getName(), "Items", allItemsBack);
+				savePlayer(p.getUniqueId(), "Items", allItemsBack); // Player#getName() -> Player#getUniqueId()
 			else
-				savePlayer(p.getName(), "WarItems", allItemsBack);
+				savePlayer(p.getUniqueId(), "WarItems", allItemsBack); // Player#getName() -> Player#getUniqueId()
 			return true;
 		} catch (Exception e) {
 			Bukkit.getLogger().info(
-					"Error saving player " + p.getName() + " at " + count);
+					"Error saving player " + p.getName() + " (" + p.getUniqueId() + ")" + " at " + count);
 		}
 		return false;
 	}
 	
-	public static void savePlayer(String p, String subDir, ItemStack[] items) {
+	public static void savePlayer(UUID p, String subDir, ItemStack[] items) {
 		try {
 			String directory = RCWars.returnPlugin().getDataFolder()
 					.getAbsolutePath()
 					+ "/" + subDir + "/";
 			if (p == null)
 				return;
-			FileWriter fstream = new FileWriter(directory + p.toLowerCase()
+			FileWriter fstream = new FileWriter(directory + p.toString()
 					+ ".txt");
 			BufferedWriter out = new BufferedWriter(fstream);
 			if (items == null) {
@@ -240,16 +250,16 @@ public class Util {
 				fstream.close();
 				return;
 			}
-			for (ItemStack tempItem : items) {
+			for (ItemStack tempItem : items) { // TODO: Deprecated, unsafe saving. Convert to Bukkit serialization.
 				if (tempItem == null) {
 					out.write("0");
 					out.newLine();
 				} else {
-					out.write(tempItem.getTypeId() + " " + tempItem.getAmount()
+					out.write(tempItem.getType() + " " + tempItem.getAmount()
 							+ " " + tempItem.getDurability() + " "
 							+ tempItem.getData().getData());
 					for (Enchantment e : tempItem.getEnchantments().keySet()) {
-						out.write(" " + e.getId() + ' '
+						out.write(" " + e.toString() + ' '
 								+ tempItem.getEnchantmentLevel(e));
 					}
 
@@ -257,7 +267,7 @@ public class Util {
 						for (Enchantment tempEnchant : ((EnchantmentStorageMeta) tempItem
 								.getItemMeta()).getStoredEnchants().keySet())
 							out.write(" "
-									+ tempEnchant.getId()
+									+ tempEnchant
 									+ ' '
 									+ ((EnchantmentStorageMeta) tempItem
 											.getItemMeta())

@@ -1,6 +1,7 @@
 package me.SgtMjrME.tasks;
 
 import java.util.Iterator;
+import java.util.UUID;
 
 import org.bukkit.entity.Player;
 
@@ -17,9 +18,9 @@ public class AnnounceBaseStatus implements Runnable {
 		while (bases.hasNext()) {
 			Base b = bases.next();
 			if (!b.willDisplay()) continue;
-			Iterator<String> players = WarPlayers.listPlayers();
+			Iterator<UUID> players = WarPlayers.listPlayers();
 			while (players.hasNext()) {
-				String pstring = players.next();
+				UUID pstring = players.next();
 				Player p = RCWars.returnPlugin().getServer().getPlayer(pstring);
 				if (p == null) {
 					WarPlayers.remove(pstring);

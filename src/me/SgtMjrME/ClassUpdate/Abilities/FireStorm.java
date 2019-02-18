@@ -20,8 +20,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
 
 public class FireStorm extends BaseAbility {
-	static HashSet<Byte> airwater = Sets.newHashSet(new Byte[] { (byte) 0,
-			(byte) 8, (byte) 9, (byte) 10, (byte) 11 });
+	static HashSet<Material> airwater = Sets.newHashSet(new Material[] { Material.AIR, // 0 = Air
+			Material.WATER, Material.LAVA }); // 8 = Flowing Water (Water), 9 = Still Water (Water), 10 = Flowing Lava (Lava), 11 = Still Lava (Lava)
 	public final String disp;
 	public final long delay;
 	public final int cost;

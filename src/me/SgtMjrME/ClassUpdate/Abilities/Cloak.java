@@ -3,6 +3,7 @@ package me.SgtMjrME.ClassUpdate.Abilities;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import me.SgtMjrME.RCWars;
 import me.SgtMjrME.Util;
@@ -35,12 +36,11 @@ public class Cloak extends BaseAbility {
 		cost = cs.getInt("cost", 3);
 		delay = cs.getLong("delay", 60000);
 		ChatColor.translateAlternateColorCodes('&', desc = cs.getString("description", "(3 WP) Gain a temp invisibility. Lost when you attack"));
-		item = new ItemStack(Material.QUARTZ, 1,
-				(short) 0);
+		item = new ItemStack(Material.QUARTZ, 1);
 		String s = "Cloak";
 		ItemMeta im = item.getItemMeta();
 		im.setDisplayName(disp);
-		if (s != null && s != ""){
+		if (s != null && s.equals("")){ // == and != comparators unsafe with Strings; use String#equals(String)
 			List<String> lore = new ArrayList<String>();
 			lore.add(s);
 			im.setLore(lore);
@@ -64,23 +64,23 @@ public class Cloak extends BaseAbility {
 	}
 
 	private static void seeAll(Player player) {
-		Iterator<String> pl = WarPlayers.listPlayers();
+		Iterator<UUID> pl = WarPlayers.listPlayers();
 		while (pl.hasNext())
 			try {
-				player.showPlayer(Bukkit.getPlayer((String) pl.next()));
+				player.showPlayer(RCWars.returnPlugin(), Bukkit.getPlayer(pl.next()));
 			} catch (Exception localException) {
 			}
 	}
 
 	private void cloakPlayer(final Player p) {
-		Iterator<String> pl = WarPlayers.listPlayers();
+		Iterator<UUID> pl = WarPlayers.listPlayers();
 		while (pl.hasNext())
 			try {
-				Player playa = Bukkit.getPlayer((String) pl.next());
+				Player playa = Bukkit.getPlayer(pl.next());
 				if (playa != null) {
 					Race r = WarPlayers.getRace(playa);
 					if (!r.isRef())
-						playa.hidePlayer(p);
+						playa.hidePlayer(RCWars.returnPlugin(), p);
 				}
 			} catch (Exception localException) {
 			}
@@ -97,12 +97,12 @@ public class Cloak extends BaseAbility {
 	private static void uncloakPlayer(Player p) {
 		if (!cloaked.contains(p.getName()))
 			return;
-		Iterator<String> pl = WarPlayers.listPlayers();
+		Iterator<UUID> pl = WarPlayers.listPlayers();
 		while (pl.hasNext())
 			try {
-				Player playa = Bukkit.getPlayer((String) pl.next());
+				Player playa = Bukkit.getPlayer(pl.next());
 				if (playa != null)
-					playa.showPlayer(p);
+					playa.showPlayer(RCWars.returnPlugin(), p);
 			} catch (Exception localException) {
 			}
 		cloaked.remove(p.getName());
@@ -136,28 +136,28 @@ public class Cloak extends BaseAbility {
 	public static void applyEffects(Player player) {
 		Race r;
 		if (cloaked.contains(player.getName())) {
-			Iterator<String> pl = WarPlayers.listPlayers();
+			Iterator<UUID> pl = WarPlayers.listPlayers();
 			while (pl.hasNext()) {
-				Player playa = Bukkit.getPlayer((String) pl.next());
+				Player playa = Bukkit.getPlayer(pl.next());
 				if (playa == null)
 					return;
 				r = WarPlayers.getRace(playa);
 				if ((r != null) && (!r.isRef()))
-					playa.hidePlayer(player);
+					playa.hidePlayer(RCWars.returnPlugin(), player);
 				else
-					playa.showPlayer(player);
+					playa.showPlayer(RCWars.returnPlugin(), player);
 			}
 		} else {
-			Iterator<String> pl = WarPlayers.listPlayers();
+			Iterator<UUID> pl = WarPlayers.listPlayers();
 			while (pl.hasNext()) {
-				Player playa = Bukkit.getPlayer((String) pl.next());
+				Player playa = Bukkit.getPlayer(pl.next());
 				if (playa == null)
 					return;
 				r = WarPlayers.getRace(playa);
 				if ((r != null) && (!r.isRef()))
-					playa.showPlayer(player);
+					playa.showPlayer(RCWars.returnPlugin(), player);
 				else
-					playa.showPlayer(player);
+					playa.showPlayer(RCWars.returnPlugin(), player);
 			}
 		}
 		r = WarPlayers.getRace(player);
@@ -167,7 +167,7 @@ public class Cloak extends BaseAbility {
 		for (String s : cloaked) {
 			Player playa = Bukkit.getPlayer(s);
 			if (playa != null)
-				player.hidePlayer(playa);
+				player.hidePlayer(RCWars.returnPlugin(), playa);
 		}
 	}
 

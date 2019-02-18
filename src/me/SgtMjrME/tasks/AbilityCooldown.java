@@ -4,12 +4,13 @@ import me.SgtMjrME.RCWars;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public class AbilityCooldown extends BukkitRunnable {
+public class AbilityCooldown implements Runnable {
 
 	final Player p;
 	final long time;
@@ -54,7 +55,8 @@ public class AbilityCooldown extends BukkitRunnable {
 		//Hopefully this means we have the correct item
 		if (stage < 4) {
 			if (stage == 0) {
-				ItemStack newitem = new ItemStack(35,1,(short) 14);
+				//ItemStack newitem = new ItemStack(35,1,(short) 14); // 1 Red Wool?
+			    ItemStack newitem = new ItemStack(Material.RED_WOOL, 1);
 				ItemMeta imn = newitem.getItemMeta();
 				imn.setDisplayName('[' + finalitem.getItemMeta().getDisplayName() + ChatColor.RESET + ChatColor.ITALIC + ']');
 				newitem.setItemMeta(imn);

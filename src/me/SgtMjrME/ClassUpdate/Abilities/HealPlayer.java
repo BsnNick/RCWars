@@ -39,7 +39,7 @@ public class HealPlayer extends BaseAbility {
 		cost = cs.getInt("cost", 0);
 		delay = cs.getLong("delay", 5000);
 		desc = ChatColor.translateAlternateColorCodes('&', cs.getString("description", "Heals your targeted player"));
-		item = new ItemStack(Material.EMERALD, 1, (short) 0);
+		item = new ItemStack(Material.EMERALD, 1);
 		String s = "HealPlayer";
 		ItemMeta im = item.getItemMeta();
 		im.setDisplayName(disp);
@@ -52,7 +52,7 @@ public class HealPlayer extends BaseAbility {
 	}
 
 	public boolean onInteract(Player p, PlayerInteractEvent e) {
-		List<Block> it = p.getLineOfSight((HashSet<Byte>)null, 20); // Shouldn't atter what the cast is (null anyway)
+		List<Block> it = p.getLineOfSight((HashSet<Material>)null, 20);
 		List<Entity> ent = p.getNearbyEntities(20.0D, 20.0D, 20.0D);
 		Player target = null;
 		for (Block targetBlock : it) {

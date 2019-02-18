@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import me.SgtMjrME.RCWars;
@@ -18,7 +19,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 public class WarPoints {
-	private static ConcurrentHashMap<String, Integer> warPointSave = new ConcurrentHashMap<String, Integer>();
+	private static ConcurrentHashMap<UUID, Integer> warPointSave = new ConcurrentHashMap<UUID, Integer>();
 	private static int warPointMax;
 	private static mysqlLink mysql;
 	private static RCWars rc;
@@ -30,15 +31,15 @@ public class WarPoints {
 	}
 	
 	public static Boolean spendWarPoints(Player p, int cost) {
-		if (warPointSave.containsKey(p.getName())) {
-			int points = warPointSave.get(p.getName());
+		if (warPointSave.containsKey(p.getUniqueId())) { // Player#getName() -> Player#getUniqueId()
+			int points = warPointSave.get(p.getUniqueId()); // Player#getName() -> Player#getUniqueId() 
 			if (points < cost) {
 				Util.sendMessage(p, ChatColor.RED + "Not enough War Points");
 				return false;
 			}
 			Util.sendMessage(p, ChatColor.GREEN + "You have been charged " + cost
 					+ " warpoints");
-			warPointSave.put(p.getName(), points - cost);
+			warPointSave.put(p.getUniqueId(), points - cost); // Player#getName() -> Player#getUniqueId()
 			saveWPnoRemove(p);
 			return true;
 		}
@@ -53,24 +54,24 @@ public class WarPoints {
 		else if (player.hasPermission("rcwars.rank3")) warPoints *= rc.rank3;
 		else if (player.hasPermission("rcwars.rank2")) warPoints *= rc.rank2;
 		else if (player.hasPermission("rcwars.rank1")) warPoints *= rc.rank1;
-		if ((warPointSave.containsKey(player.getName()))
-				&& (((Integer) warPointSave.get(player.getName())) + warPoints > warPointMax)) {
+		if ((warPointSave.containsKey(player.getUniqueId())) // Player#getName() -> Player#getUniqueId()
+				&& (((Integer) warPointSave.get(player.getUniqueId())) + warPoints > warPointMax)) { // Player#getName() -> Player#getUniqueId()
 			Util.sendMessage(player, "You have hit the max of " + warPointMax);
-			warPointSave.put(player.getName(), warPointMax);
+			warPointSave.put(player.getUniqueId(), warPointMax); // Player#getName() -> Player#getUniqueId()
 			if (mysql != null)
 				mysql.updatePlayer(player, "wp", warPoints);
 			return;
 		}
-		else if (!warPointSave.containsKey(player.getName())) {
-			warPointSave.put(player.getName(), warPoints);
+		else if (!warPointSave.containsKey(player.getUniqueId())) { // Player#getName() -> Player#getUniqueId()
+			warPointSave.put(player.getUniqueId(), warPoints); // Player#getName() -> Player#getUniqueId()
 			if (mysql != null) mysql.updatePlayer(player, "wp", warPoints);
 		} else { //how would this...
-			warPointSave.put(player.getName(), warPointSave.get(player.getName()) + warPoints);
+			warPointSave.put(player.getUniqueId(), warPointSave.get(player.getUniqueId()) + warPoints); // Player#getName() -> Player#getUniqueId()
 			if (mysql != null) mysql.updatePlayer(player, "wp", warPoints);
 		}
 	}
 	
-	public static Integer getWarPoints(String s){
+	public static Integer getWarPoints(UUID s){
 		if (!isLoaded(s)){
 			loadWarPoints(s);
 			return -1;//Hasn't loaded yet, they'll deal with it.
@@ -79,10 +80,10 @@ public class WarPoints {
 	}
 
 	public static Integer getWarPoints(Player p) {
-		return (Integer) warPointSave.get(p.getName());
+		return (Integer) warPointSave.get(p.getUniqueId()); // Player#getName() -> Player#getUniqueId()
 	}
 
-	public static void loadWarPoints(final String p) {
+	public static void loadWarPoints(final UUID p) {
 		Bukkit.getScheduler().runTaskAsynchronously(rc, new Runnable(){
 			@Override
 			public void run() {
@@ -110,15 +111,15 @@ public class WarPoints {
 		Bukkit.getScheduler().runTaskAsynchronously(rc, new Runnable(){
 			@Override
 			public void run() {
-				if (warPointSave.containsKey(p)) {
-					int points = warPointSave.get(p);
+				if (warPointSave.containsKey(p.getUniqueId())) {
+					int points = warPointSave.get(p.getUniqueId());
 					try {
 						File f = new File(rc.getDataFolder() + "/WarPoints");
 						if (!f.exists())
 							f.mkdir();
 						BufferedWriter b = new BufferedWriter(
 								new FileWriter(new File(rc.getDataFolder() + "/WarPoints/"
-										+ p.getName() + ".txt")));
+										+ p.getUniqueId() + ".txt"))); // Player#getName() -> Player#getUniqueId()
 						b.write("" + points);
 						b.close();
 					} catch (IOException e) {
@@ -131,35 +132,35 @@ public class WarPoints {
 	}
 
 	public static void saveWarPoints(final Player p) {
-		if (warPointSave.containsKey(p)) {
+		if (warPointSave.containsKey(p.getUniqueId())) {
 			saveWPnoRemove(p);
 			Bukkit.getScheduler().runTaskLater(rc, new Runnable(){
 				@Override
 				public void run(){
-					warPointSave.remove(p);
+					warPointSave.remove(p.getUniqueId());
 				}
 			}, 400);//Give it 20 seconds, should be done saving by then.
 		}
 	}
 
 	public static void dispWP(Player p) {
-		if (warPointSave.containsKey(p.getName())) {
-			Util.sendMessage(p, "You have " + warPointSave.get(p.getName())
+		if (warPointSave.containsKey(p.getUniqueId())) { // Player#getName() -> Player#getUniqueId()
+			Util.sendMessage(p, "You have " + warPointSave.get(p.getUniqueId()) // Player#getName() -> Player#getUniqueId()
 					+ " warpoints");
 		} else {
 			Util.sendMessage(p, "Your war data is not loaded, attempting load");
-			if (!isLoaded(p.getName())) Util.sendMessage(p, "Could not load)");
+			if (!isLoaded(p.getUniqueId())) Util.sendMessage(p, "Could not load)"); // Player#getName() -> Player#getUniqueId()
 			else dispWP(p);
 		}
 	}
 	
-	public static boolean isLoaded(String s){ //Will return true if it loads, false otherwise (this will load the wp's)
+	public static boolean isLoaded(UUID s){ //Will return true if it loads, false otherwise (this will load the wp's)
 		if (warPointSave.containsKey(s)) return true;
 		loadWarPoints(s);
 		return warPointSave.containsKey(s);//False if not contained, we have an issue.
 	}
 	
-	public static boolean has(String name, double amt){
+	public static boolean has(UUID name, double amt){
 		if (isLoaded(name)){
 			if (warPointSave.get(name) > amt) return true;
 			return false;

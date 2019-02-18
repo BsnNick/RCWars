@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import me.SgtMjrME.RCWars;
@@ -17,7 +18,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -271,9 +274,9 @@ public class Base {
 				s = disp + " is being repaired! " + this.damage + "/" + health;
 			}
 			if (s != "") {
-				Iterator<String> players = WarPlayers.listPlayers();
+				Iterator<UUID> players = WarPlayers.listPlayers();
 				while (players.hasNext()) {
-					String temp = (String) players.next();
+					UUID temp = players.next();
 					Player p = pl.getServer().getPlayer(temp);
 					if (p == null) {
 						WarPlayers.remove(temp);
@@ -307,7 +310,10 @@ public class Base {
 			tocolor = owner.getColor();
 		while (i.hasNext())
 		{
-			i.next().getBlock().setData((byte) 0);
+			//i.next().getBlock().setData((byte) 0);
+		    Block block = i.next().getBlock();
+		    if (Tag.WOOL.isTagged(block.getType()))
+		        block.setType(Material.WHITE_WOOL);
 		}
 	}
 
@@ -565,12 +571,14 @@ public class Base {
 			gateOpen = false;
 			Iterator<Location> l = gates.iterator();
 			while (l.hasNext())
-				l.next().getBlock().setTypeId(101);
+				//l.next().getBlock().setTypeId(101); // Iron bars
+			    l.next().getBlock().setType(Material.IRON_BARS);
 		} else {
 			gateOpen = true;
 			Iterator<Location> l = gates.iterator();
 			while (l.hasNext())
-				l.next().getBlock().setTypeId(0);
+				//l.next().getBlock().setTypeId(0); // Air
+			    l.next().getBlock().setType(Material.AIR);
 		}
 	}
 
@@ -586,12 +594,12 @@ public class Base {
 	public void capBase(Race from, Race to) {
 		giveExp(to);
 
-		Iterator<String> players = WarPlayers.listPlayers();
+		Iterator<UUID> players = WarPlayers.listPlayers();
 		ChatColor c = ChatColor.WHITE;
 		if (from != null)
 			c = from.getCcolor();
 		while (players.hasNext()) {
-			String pstring = (String) players.next();
+			UUID pstring = players.next();
 			Player p = pl.getServer().getPlayer(pstring);
 			if (p == null) {
 				WarPlayers.remove(pstring);
@@ -603,9 +611,9 @@ public class Base {
 	}
 
 	private void giveExp(Race winner) {
-		Iterator<String> i = WarPlayers.listPlayers();
+		Iterator<UUID> i = WarPlayers.listPlayers();
 		while (i.hasNext()) {
-			String pstring = (String) i.next();
+			UUID pstring = i.next();
 			Player p = pl.getServer().getPlayer(pstring);
 			if (p == null) {
 				i.remove();

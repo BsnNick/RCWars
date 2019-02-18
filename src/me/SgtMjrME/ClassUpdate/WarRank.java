@@ -2,6 +2,7 @@ package me.SgtMjrME.ClassUpdate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.UUID;
 import java.util.Vector;
 
 import me.SgtMjrME.RCWars;
@@ -14,6 +15,7 @@ import me.SgtMjrME.tasks.SetHelmetColor;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -36,7 +38,7 @@ public class WarRank {
 	public double attbowpwr;
 	float spdbst;
 	public boolean valid;
-	public static HashMap<String, WarRank> pRank = new HashMap<String, WarRank>();
+	public static HashMap<UUID, WarRank> pRank = new HashMap<UUID, WarRank>();
 //	public static HashMap<String, BaseAbility> pAbility = new HashMap<String, BaseAbility>();
 
 	public WarRank(ConfigurationSection cs, String name, int i, WarClass inclass) {
@@ -105,11 +107,11 @@ public class WarRank {
 	}
 
 	public boolean hasCommand(String s) {
-		return commands.contains(s);
+		return commands.contains(s); // ?
 	}
 
 	public void addOther(final Player p) {
-		p.getInventory().remove(262);
+		p.getInventory().remove(Material.ARROW); // 262 = Arrow
 		Bukkit.getScheduler().runTaskLater(RCWars.returnPlugin(),
 				new Runnable() {
 					public void run() {
@@ -118,7 +120,7 @@ public class WarRank {
 //							p.getInventory().setItem(i+9,
 //									(ItemStack) otherItems.get(i));
 						}
-						int slot = p.getInventory().first(119);
+						/*int slot = p.getInventory().first(Material.END_PORTAL); // 119 = end_portal
 						if (slot == -1)
 							return;
 						p.getInventory().remove(slot);
@@ -127,7 +129,7 @@ public class WarRank {
 						if (r != null)
 							swordtype = r.swordtype;
 						p.getInventory().setItem(slot,
-								new ItemStack(swordtype, 1, (short) 0));
+								new ItemStack(swordtype, 1, (short) 0));*/
 					}
 				}, 1L);
 	}
@@ -144,10 +146,10 @@ public class WarRank {
 	}
 
 	public static WarRank getPlayer(Player player) {
-		return getPlayer(player.getName());
+		return getPlayer(player.getUniqueId()); // Player#getName() -> Player#getUniqueId()
 	}
 
-	public static WarRank getPlayer(String p) {
+	public static WarRank getPlayer(UUID p) {
 		return (WarRank) pRank.get(p);
 	}
 
@@ -164,7 +166,7 @@ public class WarRank {
 
 	public void rankUp(Player p) {
 		leave(p);
-		pRank.put(p.getName(), this);
+		pRank.put(p.getUniqueId(), this); // Player#getName() -> Player#getUniqueId()
 		addArmor(p);
 		addOther(p);
 		addSkills(p);
@@ -196,7 +198,7 @@ public class WarRank {
 		for (int i = 0; i < 36; i++) {
 			if (p.getInventory().getItem(i) != null
 					&& !RCWars.allowedItems.contains(p.getInventory()
-							.getItem(i).getTypeId()))
+							.getItem(i).getType()))
 				p.getInventory().setItem(i, null);
 		}
 	}
@@ -207,7 +209,7 @@ public class WarRank {
 
 	public void leave(Player p) {
 		p.getInventory().setArmorContents(null);
-		WarRank wr = (WarRank) pRank.remove(p.getName());
+		WarRank wr = (WarRank) pRank.remove(p.getUniqueId());
 		if (wr != null)
 			wr.removeOther(p);
 		p.setWalkSpeed(0.2F);

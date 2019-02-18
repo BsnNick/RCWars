@@ -3,6 +3,7 @@ package me.SgtMjrME.listeners;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import me.SgtMjrME.ClassUpdate.Abilities.AbilityTimer;
 import me.SgtMjrME.ClassUpdate.Abilities.BaseAbility;
@@ -16,6 +17,7 @@ import me.SgtMjrME.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Explosive;
 import org.bukkit.entity.LivingEntity;
@@ -30,6 +32,8 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -38,8 +42,8 @@ public class EntityListener
   implements Listener
 {
   private final RCWars pl;
-  private HashMap<String, Long> delay = new HashMap<String, Long>();
-  public static HashMap<String, String> explDmg = new HashMap<String, String>();
+  private HashMap<UUID, Long> delay = new HashMap<UUID, Long>();
+  public static HashMap<UUID, String> explDmg = new HashMap<UUID, String>();
 
   public EntityListener(RCWars plugin) {
     pl = plugin;
@@ -128,13 +132,22 @@ public class EntityListener
 
       return;
     }
-    damageep.getInventory().getChestplate().setDurability((short)0);
+    damageep.getInventory().getChestplate().setDurability((short)0); // TODO: Update durability
     damageep.getInventory().getLeggings().setDurability((short)0);
     damageep.getInventory().getBoots().setDurability((short)0);
-    ItemStack itInHnd = damagerp.getItemInHand();
-    if (itInHnd != null && itInHnd.getItemMeta() != null
+    ItemStack itInHnd = damagerp.getInventory().getItemInMainHand();
+    
+    if (itInHnd != null && itInHnd.hasItemMeta() && itInHnd.getItemMeta() instanceof Damageable && AbilityTimer.isBaseAbility(itInHnd.getItemMeta().getDisplayName()))
+    {
+        ItemMeta im = itInHnd.getItemMeta();
+        ((Damageable)im).setDamage(0);
+        itInHnd.setItemMeta(im);
+        damagerp.getInventory().setItemInMainHand(itInHnd);
+    }
+    
+    /*if (itInHnd != null && itInHnd.getItemMeta() != null
     		&& AbilityTimer.isBaseAbility(itInHnd.getItemMeta().getDisplayName()))
-    		damagerp.getItemInHand().setDurability((short)0);
+    		damagerp.getItemInHand().setDurability((short)0);*/
     AbilityTimer.onAttack(damagerp, e);
     AbilityTimer.onDefend(damageep, e);
 
@@ -153,7 +166,7 @@ public class EntityListener
         return;
       }
 
-      explDmg.put(damageep.getName(), damagerp.getName());
+      explDmg.put(damageep.getUniqueId(), damagerp.getName()); // Player#getName() -> Player#getUniqueId()
       if (damageep.getHealth() - e.getDamage() > 0)
         WarPlayers.setDamageTime(damageep, damagerp.getName()); }
   }
@@ -201,38 +214,38 @@ public class EntityListener
   public void onPortal(PlayerPortalEvent e)
   {
     Player p = e.getPlayer();
-    if ((delay.containsKey(p.getName())) && 
-      (System.currentTimeMillis() - ((Long)delay.get(p.getName())).longValue() < 3000L)) return;
+    if ((delay.containsKey(p.getUniqueId())) && // Player#getName() -> Player#getUniqueId()
+      (System.currentTimeMillis() - ((Long)delay.get(p.getUniqueId())).longValue() < 3000L)) return; // Player#getName() -> Player#getUniqueId()
 
     Location ploc = e.getFrom().getBlock().getLocation();
     if (e.getFrom().getWorld().equals(RCWars.returnPlugin().getWarWorld())) return;
     Location temp = ploc.clone();
     temp.setX(temp.getX() - 1.0D);
-    int type = temp.getBlock().getTypeId();
+    Material type = temp.getBlock().getType();
 
-    if (type == 90) {
+    if (type.equals(Material.NETHER_PORTAL)) { // 90 = Nether portal
       Block b = checkFour(temp);
       activatePortal(p, b, e);
       return;
     }
     temp.setX(temp.getX() + 2.0D);
-    type = temp.getBlock().getTypeId();
-    if (type == 90) {
+    type = temp.getBlock().getType();
+    if (type.equals(Material.NETHER_PORTAL)) { // 90 = Nether portal
       Block b = checkFour(temp);
       activatePortal(p, b, e);
       return;
     }
     temp.setX(ploc.getX());
     temp.setZ(temp.getZ() - 1.0D);
-    type = temp.getBlock().getTypeId();
-    if (type == 90) {
+    type = temp.getBlock().getType();
+    if (type.equals(Material.NETHER_PORTAL)) { // 90 = Nether portal
       Block b = checkFour(temp);
       activatePortal(p, b, e);
       return;
     }
     temp.setZ(temp.getZ() + 2.0D);
-    type = temp.getBlock().getTypeId();
-    if (type == 90) {
+    type = temp.getBlock().getType();
+    if (type.equals(Material.NETHER_PORTAL)) { // 90 = Nether portal
       Block b = checkFour(temp);
       activatePortal(p, b, e);
       return;
@@ -242,36 +255,36 @@ public class EntityListener
 
   private Block checkFour(Location temp) {
     temp.setX(temp.getX() - 1.0D);
-    int type = temp.getBlock().getTypeId();
-    if ((type != 0) && (type != 90)) {
+    Material type = temp.getBlock().getType();
+    if ((!type.equals(Material.AIR)) && (!type.equals(Material.NETHER_PORTAL))) {
       return temp.getBlock();
     }
-    if (type == 90) {
+    if (type.equals(Material.NETHER_PORTAL)) {
       return checkFour(temp);
     }
     temp.setX(temp.getX() + 2.0D);
-    type = temp.getBlock().getTypeId();
-    if ((type != 0) && (type != 90)) {
+    type = temp.getBlock().getType();
+    if ((!type.equals(Material.AIR)) && (!type.equals(Material.NETHER_PORTAL))) {
       return temp.getBlock();
     }
-    if (type == 90) {
+    if (type.equals(Material.NETHER_PORTAL)) {
       return checkFour(temp);
     }
     temp.setX(temp.getX() - 1.0D);
     temp.setZ(temp.getZ() - 1.0D);
-    type = temp.getBlock().getTypeId();
-    if ((type != 0) && (type != 90)) {
+    type = temp.getBlock().getType();
+    if ((!type.equals(Material.AIR)) && (!type.equals(Material.NETHER_PORTAL))) {
       return temp.getBlock();
     }
-    if (type == 90) {
+    if (type.equals(Material.NETHER_PORTAL)) {
       return checkFour(temp);
     }
     temp.setZ(temp.getZ() + 2.0D);
-    type = temp.getBlock().getTypeId();
-    if ((type != 0) && (type != 90)) {
+    type = temp.getBlock().getType();
+    if ((!type.equals(Material.AIR)) && (!type.equals(Material.NETHER_PORTAL))) {
       return temp.getBlock();
     }
-    if (type == 90) {
+    if (type.equals(Material.NETHER_PORTAL)) {
       return checkFour(temp);
     }
     return null;
@@ -283,7 +296,7 @@ public class EntityListener
     if (r == null) return;
     if ((r.isRef()) && (!p.hasPermission("rcwars.ref"))) {
       Util.sendMessage(p, ChatColor.RED + "Not allowed to join ref");
-      delay.put(p.getName(), Long.valueOf(System.currentTimeMillis()));
+      delay.put(p.getUniqueId(), Long.valueOf(System.currentTimeMillis())); // Player#getName() -> Player#getUniqueId()
       return;
     }
     Race check = Race.checkRaceOpen(r);
@@ -292,7 +305,7 @@ public class EntityListener
     if (check.equals(r)) {
       if (r.getSpawn() == null) {
         Util.sendMessage(p, "Spawn for race " + r.getDisplay() + " has not been set");
-        delay.put(p.getName(), Long.valueOf(System.currentTimeMillis()));
+        delay.put(p.getUniqueId(), Long.valueOf(System.currentTimeMillis())); // Player#getName() -> Player#getUniqueId()
         return;
       }
       Bukkit.getScheduler().runTaskLater(pl, new Runnable()
@@ -302,7 +315,7 @@ public class EntityListener
           p.closeInventory();
           WarPlayers.setRace(p, r);
           Util.sendMessage(p, ChatColor.GREEN + "Set race to " + r.getDisplay());
-          delay.remove(p.getName());
+          delay.remove(p.getUniqueId()); // Player#getName() -> Player#getUniqueId()
         }
       }
       , 1L);
@@ -312,10 +325,10 @@ public class EntityListener
 
     Util.sendMessage(p, ChatColor.RED + "Races are unbalanced! " + check.getDisplay() + 
       ChatColor.RED + " has too few people!");
-    delay.put(p.getName(), Long.valueOf(System.currentTimeMillis()));
+    delay.put(p.getUniqueId(), Long.valueOf(System.currentTimeMillis())); // Player#getName() -> Player#getUniqueId()
   }
 
-  public static void removeDmg(String p)
+  public static void removeDmg(UUID p)
   {
     explDmg.remove(p);
   }

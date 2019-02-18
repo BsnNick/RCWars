@@ -28,11 +28,11 @@ public class Fireball extends BaseAbility {
 		cost = cs.getInt("cost", 0);
 		delay = cs.getLong("delay", 5000);
 		desc = ChatColor.translateAlternateColorCodes('&', cs.getString("description", "Launches a fireball"));
-		item = new ItemStack(Material.FIREBALL, 1, (short) 0);
+		item = new ItemStack(Material.FIRE_CHARGE, 1);
 		String s = "Fireball";
 		ItemMeta im = item.getItemMeta();
 		im.setDisplayName(disp);
-		if (s != null && s != ""){
+		if (s != null && !s.equals("")){
 			List<String> lore = new ArrayList<String>();
 			lore.add(s);
 			im.setLore(lore);
@@ -71,7 +71,7 @@ public class Fireball extends BaseAbility {
 		org.bukkit.entity.Fireball f = (org.bukkit.entity.Fireball) p
 				.getWorld()
 				.spawnEntity(p.getEyeLocation(), EntityType.FIREBALL);
-		Location end = p.getTargetBlock((HashSet<Byte>)null, 50).getLocation(); // Pretty sure the cast does not matter (it's null anyway)
+		Location end = p.getTargetBlock((HashSet<Material>)null, 50).getLocation();
 		Location begin = p.getEyeLocation();
 		Vector dir = end.toVector().subtract(begin.toVector());
 		f.setDirection(dir);

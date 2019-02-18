@@ -3,6 +3,7 @@ package me.SgtMjrME.object;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.UUID;
 
 import me.SgtMjrME.RCWars;
 import me.SgtMjrME.Util;
@@ -15,8 +16,8 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public class WarPlayers {
-	private static HashMap<String, dmgHold> lastDamage = new HashMap<String, dmgHold>();
-	private static HashSet<String> allPlayers = new HashSet<String>();
+	private static HashMap<UUID, dmgHold> lastDamage = new HashMap<UUID, dmgHold>();
+	private static HashSet<UUID> allPlayers = new HashSet<UUID>();
 
 	public static void clear() {
 		for (Race r : Race.getAllRaces()) {
@@ -26,7 +27,7 @@ public class WarPlayers {
 	}
 
 	public static void add(Player p, Race r) {
-		allPlayers.add(p.getName());
+		allPlayers.add(p.getUniqueId()); // Player#getName() -> Player#getUniqueId()
 		r.addPlayer(p, WarClass.defaultClass);
 		RCWars.returnPlugin().announceState(p);
 		if ((numPlayers() > 7)
@@ -44,7 +45,7 @@ public class WarPlayers {
 
 	public static void removeAll(Location l) {
 		for (Race r : Race.getAllRaces()) {
-			for (String s : r.returnPlayers().keySet()) {
+			for (UUID s : r.returnPlayers().keySet()) {
 				Player p = RCWars.returnPlugin().getServer().getPlayer(s);
 				if (p != null) {
 					remove(p, l, "Removing all players");
@@ -61,7 +62,7 @@ public class WarPlayers {
 		p.teleport(l);
 	}
 
-	public static void remove(String p) {
+	public static void remove(UUID p) {
 		allPlayers.remove(p);
 		getRace(p).removePlayer(p);
 		lastDamage.remove(p);
@@ -82,10 +83,10 @@ public class WarPlayers {
 				&& (RCWars.returnPlugin().isRunning().equals(state.RUNNING)))
 			RCWars.returnPlugin().pauseGame();
 		getRace(p).removePlayer(p);
-		allPlayers.remove(p.getName());
-		lastDamage.remove(p.getName());
-		RCWars.repairing.remove(p.getName());
-		EntityListener.removeDmg(p.getName());
+		allPlayers.remove(p.getUniqueId()); // Player#getName() -> Player#getUniqueId()
+		lastDamage.remove(p.getUniqueId()); // Player#getName() -> Player#getUniqueId()
+		RCWars.repairing.remove(p.getUniqueId()); // Player#getName() -> Player#getUniqueId()
+		EntityListener.removeDmg(p.getUniqueId()); // Player#getName() -> Player#getUniqueId()
 		if ((p == null) || (!p.isValid())) {
 			return;
 		}
@@ -101,10 +102,10 @@ public class WarPlayers {
 	}
 
 	public static Race getRace(Player p) {
-		return getRace(p.getName());
+		return getRace(p.getUniqueId()); // Player#getName() -> Player#getUniqueId()
 	}
 
-	public static Race getRace(String s) {
+	public static Race getRace(UUID s) {
 		for (Race race : Race.getAllRaces()) {
 			if (race.hasPlayer(s))
 				return race;
@@ -112,23 +113,23 @@ public class WarPlayers {
 		return null;
 	}
 
-	public static Iterator<String> listPlayers() {
+	public static Iterator<UUID> listPlayers() {
 		return allPlayers.iterator();
 	}
 
 	public static void setDamageTime(Player p, String prev) {
-		setDamageTime(p.getName(), prev);
+		setDamageTime(p.getUniqueId(), prev);
 	}
 
-	public static void setDamageTime(String name, String prev) {
+	public static void setDamageTime(UUID name, String prev) {
 		lastDamage.put(name, new dmgHold(System.currentTimeMillis(), prev));
 	}
 
 	public static boolean gotDamaged(Player p) {
-		return gotDamaged(p.getName());
+		return gotDamaged(p.getUniqueId()); // Player#getName() -> Player#getUniqueId()
 	}
 
-	public static boolean gotDamaged(String name) {
+	public static boolean gotDamaged(UUID name) {
 		if (!lastDamage.containsKey(name)) {
 			return false;
 		}
@@ -138,7 +139,7 @@ public class WarPlayers {
 		return true;
 	}
 
-	public static void removeDamaged(String name) {
+	public static void removeDamaged(UUID name) {
 		lastDamage.remove(name);
 	}
 
@@ -146,7 +147,7 @@ public class WarPlayers {
 		return allPlayers.size();
 	}
 
-	public static boolean isPlaying(String p) {
+	public static boolean isPlaying(UUID p) {
 		return allPlayers.contains(p);
 	}
 }

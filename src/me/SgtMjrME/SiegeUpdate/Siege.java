@@ -10,8 +10,11 @@ import me.SgtMjrME.RCWars;
 import me.SgtMjrME.Util;
 import me.SgtMjrME.object.Base;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
@@ -59,11 +62,12 @@ public class Siege {
 				int x = Integer.parseInt(split[0]);
 				int y = Integer.parseInt(split[1]);
 				int z = Integer.parseInt(split[2]);
-				int t = Integer.parseInt(split[3]);
-				byte d = Byte.parseByte(split[4]);
+				Material t = Material.getMaterial(split[3]); // int type id -> Material
+				org.bukkit.block.data.BlockData d = Bukkit.createBlockData(split[4]); // byte data -> BlockData
 				Location temp = new Location(w, x, y, z);
 				walls.put(temp, new BlockData(temp, t, d));
-				w.getBlockAt(temp).setTypeIdAndData(t, d, true);
+				w.getBlockAt(temp).setType(t);
+				w.getBlockAt(temp).setBlockData(d, true);
 			}
 		}
 	}
@@ -118,11 +122,10 @@ public class Siege {
 			for (int y = (int) l1.getY(); y <= l2.getY(); y++) {
 				for (int z = (int) l1.getZ(); z <= l2.getZ(); z++) {
 					Location temp = new Location(w, x, y, z);
-					walls.put(temp, new BlockData(temp, temp.getBlock()
-							.getTypeId(), (byte) 0));
+					walls.put(temp, new BlockData(temp, temp.getBlock().getType(), temp.getBlock().getBlockData()));
 					newLocations = newLocations + x + "," + y + "," + z + ","
-							+ temp.getBlock().getTypeId() + ","
-							+ temp.getBlock().getData() + ";";
+							+ temp.getBlock().getType().toString() + "," // Material.getMaterial(java.lang.String)
+							+ temp.getBlock().getBlockData().getAsString() + ";"; // Server.createBlockData(java.lang.String) 
 					count++;
 				}
 			}
@@ -147,7 +150,10 @@ public class Siege {
 			BlockData b = (BlockData) blockLoc.poll();
 			if (b == null)
 				return;
-			b.l.getBlock().setTypeIdAndData(b.id, b.dat, true);
+			//b.l.getBlock().setTypeIdAndData(b.id, b.dat, true);
+			Block block = b.getLocation().getBlock();
+			block.setType(b.getType());
+			block.setBlockData(b.getData(), true);
 		}
 	}
 	
@@ -173,9 +179,9 @@ public class Siege {
 
 	public boolean wallDestroyed(Location l) {
 		if (walls.containsKey(l)) {
-			if (l.getBlock().getTypeId() != 0)
+			if (!l.getBlock().getType().equals(Material.AIR))
 				blockLoc.push((BlockData) walls.get(l));
-			l.getBlock().setTypeId(0);
+			l.getBlock().setType(Material.AIR);
 			return true;
 		}
 		return false;
@@ -185,8 +191,8 @@ public class Siege {
 		for (Siege s : sieges) {
 			s.blockLoc.clear();
 			for (BlockData b : s.walls.values()) {
-				b.l.getBlock().setTypeId(b.id);
-				b.l.getBlock().setData(b.dat);
+				b.getLocation().getBlock().setType(b.getType());
+				b.getLocation().getBlock().setBlockData(b.getData());
 			}
 		}
 	}

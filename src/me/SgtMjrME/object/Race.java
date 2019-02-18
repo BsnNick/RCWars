@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import me.SgtMjrME.RCWars;
@@ -11,12 +12,15 @@ import me.SgtMjrME.Util;
 import me.SgtMjrME.ClassUpdate.WarClass;
 import me.SgtMjrME.tasks.ScoreboardHandler;
 
+import org.bukkit.Axis;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.PortalType;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.Orientable;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -32,8 +36,9 @@ public class Race {
 	private Location spawnZll;
 	private Location spawnZur;
 	public final Material portalType;
-	public final byte portaldmg;
-	public final MaterialData matdat;
+	//public final byte portaldmg;
+	public Axis portalDir;
+	//public final MaterialData matdat;
 	private final YamlConfiguration rcs;
 	public final int swordtype;
 	boolean ref = false;
@@ -42,7 +47,7 @@ public class Race {
 	private static ConcurrentHashMap<Player, Race> setItemRace = new ConcurrentHashMap<Player, Race>();
 
 	private static HashMap<String, Race> n2r = new HashMap<String, Race>();
-	private ConcurrentHashMap<String, WarClass> p2c = new ConcurrentHashMap<String, WarClass>();
+	private ConcurrentHashMap<UUID, WarClass> p2c = new ConcurrentHashMap<UUID, WarClass>();
 
 	public Race(YamlConfiguration cs) {
 		rcs = cs;
@@ -50,9 +55,11 @@ public class Race {
 		color = DyeColor.valueOf(cs.getString("color"));
 		ccolor = ChatColor.valueOf(cs.getString("ccolor"));
 		display = cs.getString("name");
-		portalType = Material.getMaterial(cs.getInt("portaltype"));
-		portaldmg = ((byte) cs.getInt("portaldmg", 0));
-		matdat = portalType.getNewData(portaldmg);
+		//portalType = Material.getMaterial(cs.getString("portaltype")); // Only nether portals for now
+		portalType = Material.NETHER_PORTAL;
+		//portaldmg = ((byte) cs.getInt("portaldmg", 0));
+		portalDir = Axis.valueOf(cs.getString("portalDirection", "X"));
+		//matdat = portalType.getNewData(portaldmg);
 		String temp = cs.getString("spawn");
 		swordtype = cs.getInt("swordtype", 0);
 		if (temp == null)
@@ -99,10 +106,10 @@ public class Race {
 			if (!tr.isRef())
 				numPerRace.put(tr, 0);
 		}
-		Iterator<String> players = WarPlayers.listPlayers();
+		Iterator<UUID> players = WarPlayers.listPlayers();
 		Player p;
 		while (players.hasNext()) {
-			String pstring = (String) players.next();
+			UUID pstring = players.next();
 			p = RCWars.returnPlugin().getServer().getPlayer(pstring);
 			if (p == null) {
 				players.remove();
@@ -147,8 +154,13 @@ public class Race {
 		}
 	}
 
+	@Deprecated
 	public Byte getColor() {
 		return color.getWoolData();
+	}
+	
+	public DyeColor getWoolColor() {
+	    return color;
 	}
 
 	public String getName() {
@@ -293,9 +305,9 @@ public class Race {
 	}
 
 	public void sendMessage(String mes) {
-		Iterator<String> players = WarPlayers.listPlayers();
+		Iterator<UUID> players = WarPlayers.listPlayers();
 		while (players.hasNext()) {
-			String s = (String) players.next();
+			UUID s = players.next();
 			Player send = Bukkit.getServer().getPlayer(s);
 			if ((send != null) && (WarPlayers.getRace(s).equals(this)))
 				Util.sendMessage(send, mes);
@@ -304,14 +316,14 @@ public class Race {
 
 	public void addPlayer(Player p, WarClass class1) {
 		
-		p2c.put(p.getName(), class1);
+		p2c.put(p.getUniqueId(), class1); // Player#getName() -> Player#getUniqueId()
 	}
 
 	public void removePlayer(Player p) {
-		removePlayer(p.getName());
+		removePlayer(p.getUniqueId()); // Player#getName() -> Player#getUniqueId()
 	}
 
-	public void removePlayer(String name) {
+	public void removePlayer(UUID name) {
 		p2c.remove(name);
 	}
 
@@ -319,15 +331,15 @@ public class Race {
 		return p2c.size();
 	}
 
-	public ConcurrentHashMap<String, WarClass> returnPlayers() {
+	public ConcurrentHashMap<UUID, WarClass> returnPlayers() {
 		return p2c;
 	}
 
 	public boolean hasPlayer(Player p) {
-		return hasPlayer(p.getName());
+		return hasPlayer(p.getUniqueId()); // Player#getName() -> Player#getUniqueId()
 	}
 
-	public boolean hasPlayer(String p) {
+	public boolean hasPlayer(UUID p) {
 		return p2c.containsKey(p);
 	}
 
@@ -335,16 +347,25 @@ public class Race {
 		return ref;
 	}
 
-	public static Race getRacePortal(Block b) {
+	public static Race getRacePortal(Block b) { //TODO: handle portals
 		for (Race r : n2r.values()) {
-			if ((r.matdat.getItemTypeId() == b.getTypeId())
+			/*if ((r.matdat.getItemTypeId() == b.getTypeId())
 					&& (r.matdat.getData() == b.getData()))
-				return r;
+		                return r;*/
 		}
+		
 		return null;
 	}
 	
 	public Team getTeam(){
 		return t;
+	}
+	
+	public Material getRaceWool()
+	{
+	    Material wool = Material.WHITE_WOOL;
+	    if ((wool = Material.getMaterial(color.toString().toUpperCase() + "_WOOL")) == null)
+	        return wool;
+	    return Material.WHITE_WOOL;
 	}
 }

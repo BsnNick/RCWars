@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.UUID;
 
 import me.SgtMjrME.RCWars;
 import me.SgtMjrME.Util;
@@ -56,7 +57,7 @@ public class BlockListener
   {
     if (!e.getBlock().getWorld().equals(pl.getWarWorld()))
       return;
-    if (e.getBlock().getTypeId() == 46)
+    if (e.getBlock().getType().equals(Material.TNT)) // 46 = TNT
       return;
     if (!e.getPlayer().hasPermission("rcwars.admin"))
       e.setCancelled(true);
@@ -141,13 +142,13 @@ public class BlockListener
   		cfg.save(new File(pl.getDataFolder().getAbsolutePath() + "/leaderboardSkull.yml"));
   	}
     if (!e.getBlock().getWorld().equals(this.pl.getWarWorld())) return;
-    if (e.getPlayer().getItemInHand().getTypeId() == 46) {
+    if (e.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.TNT)) { // 46 = TNT
       Siege s = Siege.isWall(e.getBlock().getLocation());
       if (s != null) {
         Base b = s.b;
-        Iterator<String> i = WarPlayers.listPlayers();
+        Iterator<UUID> i = WarPlayers.listPlayers();
         while (i.hasNext()) {
-          Player p = Bukkit.getPlayer((String)i.next());
+          Player p = Bukkit.getPlayer(i.next());
           if (p != null)
             Util.sendMessage(p, ChatColor.RED + "Base " + b.getDisp() + ChatColor.RED + " is being sieged!");
         }
@@ -163,7 +164,7 @@ public class BlockListener
         Bukkit.getScheduler().scheduleSyncDelayedTask(this.pl, new Runnable()
         {
           public void run() {
-            if ((place.getBlock() != null) && (place.getBlock().getTypeId() == 46))
+            if ((place.getBlock() != null) && (place.getBlock().getType().equals(Material.TNT)))
               createExplosion(place);
           }
         }
@@ -175,14 +176,14 @@ public class BlockListener
       e.setCancelled(true);
   }
   
-  private Skull setBlock(Material mat, Location blockLoc, BlockPlaceEvent e, BlockFace rotation){
+  private Skull setBlock(Material mat, Location blockLoc, BlockPlaceEvent e, BlockFace rotation){ // TODO: Player head
 		if (!blockLoc.getBlock().getType().equals(Material.AIR)){
 			Util.sendMessage(e.getPlayer(), "Non-air block detected, please retry");
 			return null;
 		}
 		blockLoc.getBlock().setType(mat);
 		Block b = blockLoc.clone().add(0,1,0).getBlock();
-		b.setType(Material.SKULL);
+		b.setType(Material.PLAYER_HEAD);
 		Skull skull = (Skull) b.getState();
 		skull.setSkullType(SkullType.PLAYER);
 		skull.setRotation(rotation);
@@ -205,7 +206,7 @@ public class BlockListener
 
   protected void createExplosion(Location place)
   {
-    place.getBlock().setTypeId(0);
+    place.getBlock().setType(Material.AIR);
     pl.getWarWorld().createExplosion(place, 4.0F, false);
   }
 
@@ -227,7 +228,7 @@ public class BlockListener
             {
               Location temp = new Location(coord.getWorld(), 
                 coord.getBlockX() + x, coord.getBlockY() + y, coord.getBlockZ() + z);
-              if (temp.getBlock().getTypeId() == 46) {
+              if (temp.getBlock().getType().equals(Material.TNT)) {
                 createExplosion(temp);
               }
               else {
