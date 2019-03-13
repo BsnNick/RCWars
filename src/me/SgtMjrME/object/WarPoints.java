@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import me.SgtMjrME.RCWars;
 import me.SgtMjrME.Util;
-import me.SgtMjrME.mysqlLink;
+import me.SgtMjrME.MysqlLink;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -21,10 +21,10 @@ import org.bukkit.entity.Player;
 public class WarPoints {
 	private static ConcurrentHashMap<UUID, Integer> warPointSave = new ConcurrentHashMap<UUID, Integer>();
 	private static int warPointMax;
-	private static mysqlLink mysql;
+	private static MysqlLink mysql;
 	private static RCWars rc;
 	
-	public WarPoints(int wpm, mysqlLink m, RCWars r){
+	public WarPoints(int wpm, MysqlLink m, RCWars r){
 		warPointMax = wpm;
 		mysql = m;
 		rc = r;

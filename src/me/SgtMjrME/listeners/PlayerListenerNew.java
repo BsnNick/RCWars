@@ -17,17 +17,17 @@ import java.util.UUID;
 
 import me.SgtMjrME.RCWars;
 import me.SgtMjrME.Util;
-import me.SgtMjrME.ClassUpdate.WarClass;
-import me.SgtMjrME.ClassUpdate.WarRank;
-import me.SgtMjrME.ClassUpdate.Abilities.AbilityTimer;
-import me.SgtMjrME.ClassUpdate.Abilities.BaseAbility;
-import me.SgtMjrME.SiegeUpdate.Cannon;
-import me.SgtMjrME.SiegeUpdate.Siege;
+import me.SgtMjrME.classUpdate.WarClass;
+import me.SgtMjrME.classUpdate.WarRank;
+import me.SgtMjrME.classUpdate.Abilities.AbilityTimer;
+import me.SgtMjrME.classUpdate.Abilities.BaseAbility;
 import me.SgtMjrME.object.Base;
 import me.SgtMjrME.object.Kit;
 import me.SgtMjrME.object.Race;
 import me.SgtMjrME.object.WarPlayers;
 import me.SgtMjrME.object.WarPoints;
+import me.SgtMjrME.siegeUpdate.Cannon;
+import me.SgtMjrME.siegeUpdate.Siege;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

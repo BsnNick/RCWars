@@ -75,49 +75,57 @@ public class ScoreboardHandler implements Runnable{
 		Bukkit.getScheduler().runTaskAsynchronously(RCWars.returnPlugin(), new Runnable(){
 			@Override
 			public void run() {
-				final DatabaseObject[][] db = RCWars.returnPlugin().mysql.getMaxStats();
-				Bukkit.getScheduler().runTask(RCWars.returnPlugin(), new Runnable(){
-					@Override
-					public void run(){
-						maxKillsObj.unregister();
-						maxDeathsObj.unregister();
-						maxWpObj.unregister();
-						resetObjectives();						
-						setObjective(0, maxKillsObj, db);
-						setObjective(1, maxDeathsObj, db);
-						setObjective(2, maxWpObj, db);
-						if (diamondPlayer != null) diamondPlayer.setOwner(db[0][0].s);
-						if (diamondSign != null){
-							diamondSign.setLine(2, db[0][0].s);
-							diamondSign.setLine(3, "" + db[0][0].kills);
-							diamondSign.update();
-						}
-						if (goldPlayer != null) goldPlayer.setOwner(db[0][1].s);
-						if (goldSign != null){
-							goldSign.setLine(2, db[0][1].s);
-							goldSign.setLine(3, "" + db[0][1].kills);
-							goldSign.update();
-						}
-						if (ironPlayer != null) ironPlayer.setOwner(db[0][2].s);
-						if (ironSign != null){
-							ironSign.setLine(2, db[0][2].s);
-							ironSign.setLine(3, "" + db[0][2].kills);
-							ironSign.update();
-						}
-						if (diamondPlayer != null)diamondPlayer.update();
-						if (goldPlayer != null) goldPlayer.update();
-						if (ironPlayer != null) ironPlayer.update();
-					}
+			    
+			    if (RCWars.returnPlugin().getMysqlLink() != null)
+			    {
+			        final DatabaseObject[][] db = RCWars.returnPlugin().getMysqlLink().getMaxStats();
+			        
+			        if (db != null)
+	                {
+	                    Bukkit.getScheduler().runTask(RCWars.returnPlugin(), new Runnable(){
+	                        @Override
+	                        public void run(){
+	                            maxKillsObj.unregister();
+	                            maxDeathsObj.unregister();
+	                            maxWpObj.unregister();
+	                            resetObjectives();                      
+	                            setObjective(0, maxKillsObj, db);
+	                            setObjective(1, maxDeathsObj, db);
+	                            setObjective(2, maxWpObj, db);
+	                            if (diamondPlayer != null) diamondPlayer.setOwner(db[0][0].s);
+	                            if (diamondSign != null){
+	                                diamondSign.setLine(2, db[0][0].s);
+	                                diamondSign.setLine(3, "" + db[0][0].kills);
+	                                diamondSign.update();
+	                            }
+	                            if (goldPlayer != null) goldPlayer.setOwner(db[0][1].s);
+	                            if (goldSign != null){
+	                                goldSign.setLine(2, db[0][1].s);
+	                                goldSign.setLine(3, "" + db[0][1].kills);
+	                                goldSign.update();
+	                            }
+	                            if (ironPlayer != null) ironPlayer.setOwner(db[0][2].s);
+	                            if (ironSign != null){
+	                                ironSign.setLine(2, db[0][2].s);
+	                                ironSign.setLine(3, "" + db[0][2].kills);
+	                                ironSign.update();
+	                            }
+	                            if (diamondPlayer != null)diamondPlayer.update();
+	                            if (goldPlayer != null) goldPlayer.update();
+	                            if (ironPlayer != null) ironPlayer.update();
+	                        }
 
-					private void setObjective(int place, Objective obj,
-							DatabaseObject[][] db) {
-						Score s;
-						for(int i = 0; i < 3; i++){
-							s = obj.getScore(Bukkit.getOfflinePlayer(db[place][i].s));
-							s.setScore(db[place][i].get(place));
-						}
-					}
-				});
+	                        private void setObjective(int place, Objective obj,
+	                                DatabaseObject[][] db) {
+	                            Score s;
+	                            for(int i = 0; i < 3; i++){
+	                                s = obj.getScore(Bukkit.getOfflinePlayer(db[place][i].s));
+	                                s.setScore(db[place][i].get(place));
+	                            }
+	                        }
+	                    });
+	                }
+			    }
 			}
 		});
 	}
@@ -126,7 +134,7 @@ public class ScoreboardHandler implements Runnable{
 		Bukkit.getScheduler().runTaskAsynchronously(RCWars.returnPlugin(), new Runnable(){
 			@Override
 			public void run(){
-				final int[] stats = RCWars.returnPlugin().mysql.getStats(p.getUniqueId()); // Player#getName() -> Player#getUniqueId()
+				final int[] stats = RCWars.returnPlugin().getMysqlLink().getStats(p.getUniqueId()); // Player#getName() -> Player#getUniqueId()
 				Bukkit.getScheduler().runTask(RCWars.returnPlugin(), new Runnable(){
 					@Override
 					public void run(){

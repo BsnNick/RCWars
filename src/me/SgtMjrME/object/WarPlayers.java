@@ -7,8 +7,8 @@ import java.util.UUID;
 
 import me.SgtMjrME.RCWars;
 import me.SgtMjrME.Util;
-import me.SgtMjrME.ClassUpdate.WarClass;
-import me.SgtMjrME.ClassUpdate.WarRank;
+import me.SgtMjrME.classUpdate.WarClass;
+import me.SgtMjrME.classUpdate.WarRank;
 import me.SgtMjrME.listeners.EntityListener;
 import me.SgtMjrME.tasks.ScoreboardHandler;
 

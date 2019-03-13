@@ -5,14 +5,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-import me.SgtMjrME.ClassUpdate.Abilities.AbilityTimer;
-import me.SgtMjrME.ClassUpdate.Abilities.BaseAbility;
-import me.SgtMjrME.SiegeUpdate.TntMeta;
 import me.SgtMjrME.object.Race;
 import me.SgtMjrME.object.WarPlayers;
-import me.SgtMjrME.ClassUpdate.WarRank;
+import me.SgtMjrME.siegeUpdate.TntMeta;
 import me.SgtMjrME.RCWars;
 import me.SgtMjrME.Util;
+import me.SgtMjrME.classUpdate.WarRank;
+import me.SgtMjrME.classUpdate.Abilities.AbilityTimer;
+import me.SgtMjrME.classUpdate.Abilities.BaseAbility;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

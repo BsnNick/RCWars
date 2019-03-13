@@ -13,11 +13,9 @@ import java.util.Iterator;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import me.SgtMjrME.ClassUpdate.WarClass;
-import me.SgtMjrME.ClassUpdate.WarRank;
-import me.SgtMjrME.ClassUpdate.Abilities.AbilityTimer;
-import me.SgtMjrME.SiegeUpdate.Cannon;
-import me.SgtMjrME.SiegeUpdate.Siege;
+import me.SgtMjrME.classUpdate.WarClass;
+import me.SgtMjrME.classUpdate.WarRank;
+import me.SgtMjrME.classUpdate.Abilities.AbilityTimer;
 import me.SgtMjrME.listeners.BlockListener;
 import me.SgtMjrME.listeners.EntityListener;
 import me.SgtMjrME.listeners.MobHandler;
@@ -29,14 +27,16 @@ import me.SgtMjrME.object.Rally;
 import me.SgtMjrME.object.WarPlayers;
 import me.SgtMjrME.object.WarPoints;
 import me.SgtMjrME.object.state;
+import me.SgtMjrME.siegeUpdate.Cannon;
+import me.SgtMjrME.siegeUpdate.Siege;
 import me.SgtMjrME.tasks.AnnounceBaseStatus;
 import me.SgtMjrME.tasks.CosmeticHandler;
 import me.SgtMjrME.tasks.DisplayStats;
 import me.SgtMjrME.tasks.ScoreboardHandler;
-import me.SgtMjrME.tasks.gateCheck;
-import me.SgtMjrME.tasks.runCheck;
-import me.SgtMjrME.tasks.spawnCheck;
-import me.SgtMjrME.tasks.timedExp;
+import me.SgtMjrME.tasks.GateCheck;
+import me.SgtMjrME.tasks.RunCheck;
+import me.SgtMjrME.tasks.SpawnCheck;
+import me.SgtMjrME.tasks.TimedExp;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -83,7 +83,7 @@ public class RCWars extends JavaPlugin {
 	private int closeDuration;
 	public Kit kitOnSpawn;
 	private int repairBaseVal;
-	public mysqlLink mysql;
+	private MysqlLink mysql;
 	public int hitexp;
 	public static int killexp;
 	public static int basecapexp;
@@ -156,6 +156,7 @@ public class RCWars extends JavaPlugin {
 	private int timedWarPoints;
 
 	public void onEnable() {
+	    System.out.println("Booting 1...");
 		new Util();
 		pm = getServer().getPluginManager();
 		log = getServer().getLogger();
@@ -167,16 +168,19 @@ public class RCWars extends JavaPlugin {
 			else
 				log.warning("Essentials not loaded");
 		}
+		System.out.println("Booting 2...");
 		isRunning = state.STOPPED;
 		instance = this;
 		playerListener = new PlayerListenerNew(this);
 		blockListener = new BlockListener(this);
 		entityListener = new EntityListener(this);
 		mobHandler = new MobHandler();
+		System.out.println("Booting 2...");
 		pm.registerEvents(playerListener, this);
 		pm.registerEvents(blockListener, this);
 		pm.registerEvents(entityListener, this);
 		pm.registerEvents(mobHandler, this);
+		System.out.println("Booting 3...");
 
 		config = new YamlConfiguration();
 		try {
@@ -189,8 +193,9 @@ public class RCWars extends JavaPlugin {
 		} catch (InvalidConfigurationException e) {
 			e.printStackTrace();
 		}
+		System.out.println("Booting 4...");
 		try{
-			mysql = new mysqlLink(config.getString("address", "localhost"),
+			mysql = new MysqlLink(config.getString("address", "localhost"),
 					config.getString("port", "3306"), config.getString("username",
 							"root"), config.getString("password", ""),
 					config.getString("dbname", "rcwars"));
@@ -199,8 +204,9 @@ public class RCWars extends JavaPlugin {
 				log.warning("Could not load mysql, continuing");
 				mysql = null;
 			}
+		System.out.println("Booting 5...");
 		Bukkit.getScheduler().runTaskTimer(this, new ScoreboardHandler(), 20, 200);
-		ScoreboardHandler.setupSkulls();
+		//ScoreboardHandler.setupSkulls(); // TODO: TEMPORARY
 		new AbilityTimer(config);
 		String temp = config.getString("world", null);
 		hitexp = config.getInt("exp.hit", 1);
@@ -214,6 +220,7 @@ public class RCWars extends JavaPlugin {
 		rank4 = config.getDouble("rank4",1);
 		rank5 = config.getDouble("rank5",1);
 		rank6 = config.getDouble("rank6",1);
+		System.out.println("Booting 6...");
 		
 		if (temp == null)
 			world = null;
@@ -248,24 +255,27 @@ public class RCWars extends JavaPlugin {
 			allowedItems.add(Material.getMaterial(bl));
 		}
 		
-		/* TODO
-		 * 
-		 * Team colored TNT trails! Will use RGB values and reddust particles to add
-		 *  colored trails to the tnt that correspond to the player's team color.
-		 *  Add the TNT entity to '_tnt' ArrayList, and remove it when it
-		 *  is removed/killed/invalid. Let's add more cosmetic apsects to RCWars!
-		 *  -000Nick
-		 */
-		Bukkit.getScheduler().runTaskTimer(this, new CosmeticHandler(), 1, 4);
+		System.out.println("Booting 7A...");
+		
+		
+		//Bukkit.getScheduler().runTaskTimer(this, new CosmeticHandler(), 1, 4);
 		
 		MobHandler.resetMobs();
+		System.out.println("Booting 7B...");
 		loadRaces();
+		System.out.println("Booting 7C...");
 		Base.loadBases(this);
+		System.out.println("Booting 7D...");
 		Cannon.loadCannons(this);
+		System.out.println("Booting 7E...");
 		startupChest();
+		System.out.println("Booting 7F...");
 		Kit.loadKits(this);
+		System.out.println("Booting 7G...");
 		kitOnSpawn = Kit.getKit(config.getString("kitOnSpawn", null));
+		System.out.println("Booting 7H...");
 		WarClass.loadClasses(this);
+		System.out.println("Booting 8... Complete");
 	}
 
 	private void startupChest() {
@@ -391,6 +401,7 @@ public class RCWars extends JavaPlugin {
 		String[] files = f.list();
 		for (String s : files) {
 			if (s.endsWith(".yml")) {
+			    System.out.println("Loading Race \"" + s + "\"...");
 				f = new File(getDataFolder().getAbsolutePath() + "/Races/" + s);
 				YamlConfiguration temp = new YamlConfiguration();
 				try {
@@ -1448,18 +1459,18 @@ public class RCWars extends JavaPlugin {
 		isRunning = state.RUNNING;
 		cancelMyTasks();
 		getServer().getScheduler().scheduleSyncRepeatingTask(this,
-				new runCheck(this), 0L, 200L);
+				new RunCheck(this), 0L, 200L);
 		getServer().getScheduler().scheduleSyncRepeatingTask(this,
 				new AnnounceBaseStatus(), 0L, 6000L);
 		getServer().getScheduler().scheduleSyncRepeatingTask(this,
-				new gateCheck(this), 0L, (openDuration + closeDuration) * 20);
+				new GateCheck(this), 0L, (openDuration + closeDuration) * 20);
 		getServer().getScheduler().scheduleSyncRepeatingTask(this,
-				new gateCheck(this), openDuration * 20,
+				new GateCheck(this), openDuration * 20,
 				(openDuration + closeDuration) * 20);
 		getServer().getScheduler().scheduleSyncRepeatingTask(this,
-				new timedExp(this), 0L, timedTime);
+				new TimedExp(this), 0L, timedTime);
 		getServer().getScheduler().scheduleSyncRepeatingTask(this,
-				new spawnCheck(this), 0L, 20L);
+				new SpawnCheck(this), 0L, 20L);
 
 		Iterator<Base> i = Base.returnBases().iterator();
 		while (i.hasNext())
@@ -1481,19 +1492,19 @@ public class RCWars extends JavaPlugin {
 		isRunning = state.RUNNING;
 		cancelMyTasks();
 		getServer().getScheduler().scheduleSyncRepeatingTask(this,
-				new runCheck(this), 0L, 200L);
+				new RunCheck(this), 0L, 200L);
 		getServer().getScheduler().scheduleSyncRepeatingTask(this,
 				new AnnounceBaseStatus(), 0L, 6000L);
 
 		getServer().getScheduler().scheduleSyncRepeatingTask(this,
-				new gateCheck(this), 0L, (openDuration + closeDuration) * 20);
+				new GateCheck(this), 0L, (openDuration + closeDuration) * 20);
 		getServer().getScheduler().scheduleSyncRepeatingTask(this,
-				new gateCheck(this), openDuration * 20,
+				new GateCheck(this), openDuration * 20,
 				(openDuration + closeDuration) * 20);
 		getServer().getScheduler().scheduleSyncRepeatingTask(this,
-				new timedExp(this), timedTime, timedTime);
+				new TimedExp(this), timedTime, timedTime);
 		getServer().getScheduler().scheduleSyncRepeatingTask(this,
-				new spawnCheck(this), 0L, 20L);
+				new SpawnCheck(this), 0L, 20L);
 
 		String s = ChatColor.GREEN + "The War has resumed!";
 		Iterator<UUID> p = WarPlayers.listPlayers();
@@ -1627,5 +1638,10 @@ public class RCWars extends JavaPlugin {
 		if (mysql == null) return;
 		if (place == 0)
 			mysql.updatePlayer(p, d);
+	}
+	
+	public MysqlLink getMysqlLink() throws NullPointerException
+	{
+	    return mysql;
 	}
 }

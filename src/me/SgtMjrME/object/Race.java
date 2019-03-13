@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import me.SgtMjrME.RCWars;
 import me.SgtMjrME.Util;
-import me.SgtMjrME.ClassUpdate.WarClass;
+import me.SgtMjrME.classUpdate.WarClass;
 import me.SgtMjrME.tasks.ScoreboardHandler;
 
 import org.bukkit.Axis;
@@ -315,8 +315,9 @@ public class Race {
 	}
 
 	public void addPlayer(Player p, WarClass class1) {
-		
-		p2c.put(p.getUniqueId(), class1); // Player#getName() -> Player#getUniqueId()
+		UUID uuid = p.getUniqueId();
+		WarClass wc = class1;
+		p2c.put(uuid, wc); // Player#getName() -> Player#getUniqueId()
 	}
 
 	public void removePlayer(Player p) {

@@ -8,7 +8,7 @@ import me.SgtMjrME.RCWars;
 import me.SgtMjrME.object.MobHolder;
 import me.SgtMjrME.object.Race;
 import me.SgtMjrME.object.WarPlayers;
-import me.SgtMjrME.tasks.SpiderAgressor;
+import me.SgtMjrME.tasks.SpiderAggressor;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -52,7 +52,7 @@ public class MobHandler implements Listener{
 			}
 		}
 		if (spiderTask != null) spiderTask.cancel();
-		spiderTask = Bukkit.getScheduler().runTaskTimer(RCWars.returnPlugin(), new SpiderAgressor(), 20, 80);
+		spiderTask = Bukkit.getScheduler().runTaskTimer(RCWars.returnPlugin(), new SpiderAggressor(), 20, 80);
 	}
 	
 	/*

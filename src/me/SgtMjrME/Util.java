@@ -284,7 +284,7 @@ public class Util {
 			Player player = Bukkit.getServer().getPlayer(p);
 			if (player == null)
 				return;
-			Util.sendMessage(player, C.cRed + "Unfortunately, an error has occurred. Please report this to a staff member and do not re-enter RCWars: " + C.cGold + "(savePlayer)");
+			Util.sendMessage(player, ChatColor.RED + "Unfortunately, an error has occurred. Please report this to a staff member and do not re-enter RCWars: " + ChatColor.GOLD + "(savePlayer)");
 			System.err.println("Error: " + e1.getMessage());
 		}
 	}

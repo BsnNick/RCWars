@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import me.SgtMjrME.RCWars;
 import me.SgtMjrME.Util;
-import me.SgtMjrME.SiegeUpdate.Siege;
+import me.SgtMjrME.siegeUpdate.Siege;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -190,6 +190,7 @@ public class Base {
 		String[] files = f.list();
 		for (String s : files) {
 			if (s.endsWith(".yml")) {
+			    System.out.println("Loading Base \"" + s + "\"...");
 				f = new File("plugins/RCWars/Bases/" + s);
 				YamlConfiguration temp = new YamlConfiguration();
 				try {
@@ -310,10 +311,19 @@ public class Base {
 			tocolor = owner.getColor();
 		while (i.hasNext())
 		{
+		    Location loc = i.next();
+		    
+		    if (loc != null && loc.getBlock() != null)
+		    {
+		        Block block = loc.getBlock();
+	            if (Tag.WOOL.isTagged(block.getType()))
+	                block.setType(Material.WHITE_WOOL);
+		    }
+		        
 			//i.next().getBlock().setData((byte) 0);
-		    Block block = i.next().getBlock();
-		    if (Tag.WOOL.isTagged(block.getType()))
-		        block.setType(Material.WHITE_WOOL);
+		    //Block block = i.next().getBlock();
+		    //if (Tag.WOOL.isTagged(block.getType()))
+		        //block.setType(Material.WHITE_WOOL);
 		}
 	}
 

@@ -9,10 +9,10 @@ import java.util.UUID;
 
 import me.SgtMjrME.RCWars;
 import me.SgtMjrME.Util;
-import me.SgtMjrME.ClassUpdate.Abilities.AbilityTimer;
-import me.SgtMjrME.SiegeUpdate.Siege;
+import me.SgtMjrME.classUpdate.Abilities.AbilityTimer;
 import me.SgtMjrME.object.Base;
 import me.SgtMjrME.object.WarPlayers;
+import me.SgtMjrME.siegeUpdate.Siege;
 import me.SgtMjrME.tasks.ScoreboardHandler;
 
 import org.bukkit.Bukkit;

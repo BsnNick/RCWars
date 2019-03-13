@@ -34,7 +34,7 @@ public class DisplayStats implements Runnable{
 	
 	@Override
 	public void run() {
-		final int[] out = RCWars.returnPlugin().mysql.getStats(p.getUniqueId()); // Player#getName() -> Player#getUniqueId()
+		final int[] out = RCWars.returnPlugin().getMysqlLink().getStats(p.getUniqueId()); // Player#getName() -> Player#getUniqueId()
 		Bukkit.getScheduler().runTask(RCWars.returnPlugin(), new Runnable(){
 			@Override
 			public void run() {

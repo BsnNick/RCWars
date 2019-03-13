@@ -3,8 +3,7 @@ authors: [SgtMjrME, 000Nick]
 main: me.SgtMjrME.RCWars
 version: 4.0
 description: Wars 4.0, the 1.8-1.13 update by 000Nick.
-softdepend: [Essentials]
-depends: [Vault]
+softdepend: [Essentials, Vault]
 api-version: 1.13
 
 commands:

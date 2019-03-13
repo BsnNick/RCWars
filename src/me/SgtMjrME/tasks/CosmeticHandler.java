@@ -22,24 +22,24 @@ public class CosmeticHandler extends BukkitRunnable
 				cancel();
 			}
 			
-			switch (_tnt.get(tnt))
-			{
-			case "orc":
-				UtilColorParticle.RED_DUST.send(tnt.getLocation(), 255, 85, 85);
-				break;
-			case "owarf":
-				UtilColorParticle.RED_DUST.send(tnt.getLocation(), 255, 170, 0);
-				break;
-			case "human":
-				UtilColorParticle.RED_DUST.send(tnt.getLocation(), 85, 85, 255);
-				break;
-			case "elf":
-				UtilColorParticle.RED_DUST.send(tnt.getLocation(), 85, 255, 85);
-				break;
-			default:
-				UtilColorParticle.RED_DUST.send(tnt.getLocation(), 0, 0, 0);
-				break;
-			}
-		}
+            switch (_tnt.get(tnt))
+            {
+                case "orc":
+                    UtilColorParticle.RED_DUST.send(tnt.getLocation(), 255, 85, 85);
+                    break;
+                case "owarf":
+                    UtilColorParticle.RED_DUST.send(tnt.getLocation(), 255, 170, 0);
+                    break;
+                case "human":
+                    UtilColorParticle.RED_DUST.send(tnt.getLocation(), 85, 85, 255);
+                    break;
+                case "elf":
+                    UtilColorParticle.RED_DUST.send(tnt.getLocation(), 85, 255, 85);
+                    break;
+                default:
+                    UtilColorParticle.RED_DUST.send(tnt.getLocation(), 0, 0, 0);
+                    break;
+            }
+        }
 	}
 }
